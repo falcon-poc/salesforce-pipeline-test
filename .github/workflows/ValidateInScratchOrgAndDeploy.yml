@@ -152,6 +152,9 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
+          echo "🔹 Cleaning up: Deleting scratch org: $SCRATCH_ORG_ALIAS..."
+          sf org delete scratch --target-org "$SCRATCH_ORG_ALIAS" --no-prompt
+
           echo "🔹 Cleaning up: Logging out from Dev Hub: $DEV_HUB_TARGET_ALIAS..."
           sf org logout --target-org "$DEV_HUB_TARGET_ALIAS" --no-prompt || true
         
@@ -160,8 +163,5 @@ jobs:
         
           echo "🔹 Cleaning up: Deleting apex test results..."
           rm -f -v test-results.json
-        
-          echo "🔹 Cleaning up: Deleting scratch org: $SCRATCH_ORG_ALIAS..."
-          sf org delete scratch --target-org "$SCRATCH_ORG_ALIAS" --no-prompt
         
           echo "✅ Cleanup complete"
