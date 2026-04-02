@@ -1,0 +1,10 @@
+{
+  "orgName": "Menlo Test Org",
+  "edition": "enterprise",
+  "features": ["Communities"],
+  "settings": {
+    "quoteSettings": {
+      "enableQuote": true
+    }
+  }
+}
