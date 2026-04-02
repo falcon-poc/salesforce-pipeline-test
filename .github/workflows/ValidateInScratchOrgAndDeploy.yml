@@ -18,21 +18,21 @@ jobs:
       DEV_HUB_AUTH_URL: ${{ secrets.DEV_HUB_AUTH_URL }}
       DEV_SANDBOX_AUTH_URL: ${{ secrets.DEV_SANDBOX_AUTH_URL }}
 
-      SCRATCH_ORG_DEFINITION: "./config/scratch-org-def.json"      
+      SCRATCH_ORG_DEFINITION: "./config/scratch-org-def.json"
       SOURCE_DIR: "force-app"
 
     steps:
       # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       # 2. Install Node.js
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          
+          node-version: "20"
+          cache: "npm"
+
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
@@ -42,13 +42,13 @@ jobs:
       # 4. Authenticate to Dev Hub
       - name: Authenticate to Dev Hub
         run: |
-          echo "--- Authenticating with Salesforce Org using JWT Flow ---"
-          
+          echo "--- Authenticating with Salesforce Org using sfdx Auth URL ---"
+
           AUTH_FILE=$(mktemp)
           echo "$DEV_HUB_AUTH_URL" > "$AUTH_FILE"
           sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$DEV_HUB_TARGET_ALIAS" --set-default-dev-hub
           rm "$AUTH_FILE"          
-      
+
           ACTUAL_ORG_ID=$(sf org display --target-org "$DEV_HUB_TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")          
                 
           if [ "${ACTUAL_ORG_ID:0:15}" != "${DEV_HUB_ORG_ID:0:15}" ]; then
@@ -71,21 +71,21 @@ jobs:
                   --wait 10 \
                   --json
           )
-          
+
           echo "$CREATE_SCRATCH_ORG_JSON"
-      
+
           SCRATCH_ORG_STATUS=$(echo "$CREATE_SCRATCH_ORG_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
               j.status ?? 1;           
           ")
-      
+
           echo "SCRATCH_ORG_STATUS: $SCRATCH_ORG_STATUS"
-          
+
           if [ $SCRATCH_ORG_STATUS -ne 0 ]; then
               echo "--- Scratch org creation failed. Exiting script. ---"
               exit 1
           fi
-      
+
           echo "✅ Scratch org created successfully"
 
       # 6. Deploy Metadata to Scratch Org
@@ -97,36 +97,36 @@ jobs:
 
       #7. Run Apex tests
       - name: Run Apex tests
-        run: |           
+        run: |
           echo "--- Running Apex tests ---"
           sf apex run test -o $SCRATCH_ORG_ALIAS --wait 10 -y --result-format json --synchronous > test-results.json || true
-      
+
           APEX_TESTS_SUCCESS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('test-results.json')).result.summary.outcome)")
-      
+
           echo "APEX TESTS_SUCCESS: $APEX_TESTS_SUCCESS"
                 
           if [ "$APEX_TESTS_SUCCESS" != "Passed" ]; then
               echo "--- Apex Tests failed. Exiting script. ---"
               exit 1
           fi
-  
+
           echo "--- All Apex tests passed ---"
 
       #8. Run LWC tests
       - name: Run LWC tests
-        run: |           
+        run: |
           echo "--- Running LWC tests ---"
-      
+
           npm ci
           set -o pipefail
           npx lwc-jest 2>&1
           LWC_EXIT_CODE=$?
-      
+
           if [ $LWC_EXIT_CODE -ne 0 ]; then
               echo "❌ LWC tests failed"
               exit $LWC_EXIT_CODE
           fi
-      
+
           echo "--- ✅ All LWC tests passed ---"
           echo "✅ Validation and Deployment Complete!"
 
@@ -137,10 +137,10 @@ jobs:
 
           AUTH_FILE=$(mktemp)
           echo "$DEV_SANDBOX_AUTH_URL" > "$AUTH_FILE"
-      
+
           sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_SANDBOX_ALIAS"
           rm "$AUTH_FILE"
-          
+
           ACTUAL_SANDBOX_ORG_ID=$(sf org display --target-org "$TARGET_SANDBOX_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
           echo "ACTUAL_SANDBOX_ORG_ID: $ACTUAL_SANDBOX_ORG_ID"
                
@@ -148,9 +148,9 @@ jobs:
               echo "--- Authentication failed. Exiting script. ---"
               exit 1
           fi
-      
+
           echo "--- Deploying to Dev Sandbox ---"
-      
+
           sf project deploy start --target-org $TARGET_SANDBOX_ALIAS --source-dir force-app --wait 10
 
           echo "🎉 Deployment pipeline completed successfully!"
@@ -164,11 +164,11 @@ jobs:
 
           echo "🔹 Cleaning up: Logging out from Dev Hub: $DEV_HUB_TARGET_ALIAS..."
           sf org logout --target-org "$DEV_HUB_TARGET_ALIAS" --no-prompt || true
-        
+
           echo "🔹 Cleaning up: Logging out from Dev Sandbox: $TARGET_SANDBOX_ALIAS..."
           sf org logout --target-org "$TARGET_SANDBOX_ALIAS" --no-prompt || true
-        
+
           echo "🔹 Cleaning up: Deleting apex test results..."
           rm -f -v test-results.json
-        
+
           echo "✅ Cleanup complete"
