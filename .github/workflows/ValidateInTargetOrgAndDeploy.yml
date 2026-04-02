@@ -18,7 +18,6 @@ jobs:
       DEV_SANDBOX_AUTH_URL: ${{ secrets.DEV_SANDBOX_AUTH_URL }}
 
       TEMP_MANIFEST: "tempDeployManifest.xml"
-      # DESTRUCTIVE_AUTO: "destructiveChangesAuto.xml"
       DEPLOY_WAIT: 10
       VALIDATED_JOB_ID: ""   
       SOURCE_DIR: "force-app"
@@ -72,7 +71,6 @@ jobs:
             --json || true
             )
           
-          # store validation status and job ID
           read STATUS VALIDATED_JOB_ID < <(
               echo "$VALIDATE_JSON" | node -pe "
                   const j = JSON.parse(require('fs').readFileSync(0));
@@ -93,7 +91,7 @@ jobs:
       
           echo "✅ Validation passed"
 
-      #8. Run LWC tests
+      #7. Run LWC tests
       - name: Run LWC tests
         run: |           
           npm ci
@@ -111,7 +109,7 @@ jobs:
       
           echo "✅ LWC tests passed"
 
-      # 9. Authenticate and deploy metadata to Dev org
+      # 8. Authenticate and deploy metadata to Dev org
       - name: Deploy Metadata to Dev Org
         run: |
           DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
@@ -132,7 +130,7 @@ jobs:
 
           echo "🎉 Deployment pipeline completed successfully!"
 
-      # 10. Cleanup
+      # 9. Cleanup
       - name: Cleanup
         if: always()
         run: |
