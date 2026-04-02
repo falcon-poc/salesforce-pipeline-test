@@ -16,6 +16,7 @@ jobs:
       TARGET_SANDBOX_ALIAS: ${{ secrets.TARGET_SANDBOX_ALIAS }}
       TARGET_SANDBOX_ORG_ID: ${{ secrets.TARGET_SANDBOX_ORG_ID }}
       DEV_HUB_AUTH_URL: ${{ secrets.DEV_HUB_AUTH_URL }}
+      DEV_SANDBOX_AUTH_URL: ${{ secrets.DEV_SANDBOX_AUTH_URL }}
 
       SCRATCH_ORG_DEFINITION: "./config/scratch-org-def.json"      
       SOURCE_DIR: "force-app"
@@ -123,12 +124,12 @@ jobs:
           echo "✅ Validation and Deployment Complete!"
 
       # 7. Authenticate and deploy metadata to Dev org
-      - name: Deploy Config-First Metadata to Dev Org
+      - name: Deploy Metadata to Dev Org
         run: |
           echo "--- Authenticating to Dev Sandbox ---"          
 
           AUTH_FILE=$(mktemp)
-          echo "$AUTH_URL" > "$AUTH_FILE"
+          echo "$DEV_SANDBOX_AUTH_URL" > "$AUTH_FILE"
       
           sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_SANDBOX_ALIAS"
           rm "$AUTH_FILE"
