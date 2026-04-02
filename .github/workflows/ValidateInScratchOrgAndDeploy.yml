@@ -94,9 +94,12 @@ jobs:
           echo "🔹 Deploying to Scratch org '$SCRATCH_ORG_ALIAS'..."
 
           sf project deploy start --target-org $SCRATCH_ORG_ALIAS --source-dir force-app --wait 10
-                   
+
+      #7. Run Apex tests
+      - name: Run Apex tests
+        run: |           
           echo "--- Running Apex tests ---"
-          sf apex run test -o $SCRATCH_ORG_ALIAS --wait 10 -y --result-format json --synchronous > test-results.json
+          sf apex run test -o $SCRATCH_ORG_ALIAS --wait 10 -y --result-format json --synchronous > test-results.json || true
       
           APEX_TESTS_SUCCESS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('test-results.json')).result.summary.outcome)")
       
@@ -107,7 +110,11 @@ jobs:
               exit 1
           fi
   
-          echo "--- All Apex tests passed ---"                   
+          echo "--- All Apex tests passed ---"
+
+      #8. Run LWC tests
+      - name: Run LWC tests
+        run: |           
           echo "--- Running LWC tests ---"
       
           npm ci
@@ -123,7 +130,7 @@ jobs:
           echo "--- ✅ All LWC tests passed ---"
           echo "✅ Validation and Deployment Complete!"
 
-      # 7. Authenticate and deploy metadata to Dev org
+      # 9. Authenticate and deploy metadata to Dev org
       - name: Deploy Metadata to Dev Org
         run: |
           echo "--- Authenticating to Dev Sandbox ---"          
@@ -148,7 +155,7 @@ jobs:
 
           echo "🎉 Deployment pipeline completed successfully!"
 
-      # 8. Cleanup
+      # 10. Cleanup
       - name: Cleanup
         if: always()
         run: |
