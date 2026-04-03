@@ -85,6 +85,7 @@ jobs:
 
           echo "VALIDATED_JOB_ID: $VALIDATED_JOB_ID"
           echo "STATUS: $STATUS"
+          echo "VALIDATE RESPONSE JSON: $VALIDATE_JSON"
 
           echo "VALIDATED_JOB_ID=$VALIDATED_JOB_ID" >> $GITHUB_ENV
 
