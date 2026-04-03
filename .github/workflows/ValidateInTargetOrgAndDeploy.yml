@@ -120,10 +120,10 @@ jobs:
         run: |
           echo "Validated Job ID: $VALIDATED_JOB_ID"
 
-          # DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
-          DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
+          DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
+          # DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
 
-          echo "DEPLOY CMD: $DEPLOY_CMD"
+          echo "DEPLOY CMD: ${DEPLOY_CMD[@]}"
 
           set +e
 
