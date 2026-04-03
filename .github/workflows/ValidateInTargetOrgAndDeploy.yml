@@ -86,6 +86,8 @@ jobs:
           echo "VALIDATED_JOB_ID: $VALIDATED_JOB_ID"
           echo "STATUS: $STATUS"
 
+          echo "VALIDATED_JOB_ID=$VALIDATED_JOB_ID" >> $GITHUB_ENV
+
           if [[ "$STATUS" != "Succeeded" ]]; then
               echo "❌ Validation failed: $STATUS"
               echo "VALIDATE RESPONSE JSON: $VALIDATE_JSON"
@@ -115,6 +117,8 @@ jobs:
       # 8. Authenticate and deploy metadata to Target org
       - name: Deploy Metadata to Target Org
         run: |
+          echo "Validated Job ID: $VALIDATED_JOB_ID"
+
           DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
 
           DEPLOY_JSON=$("${DEPLOY_CMD[@]}")
