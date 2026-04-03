@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - dev
+    paths:
+      - "force-app/**"
 
 jobs:
   deploy-package-and-config:

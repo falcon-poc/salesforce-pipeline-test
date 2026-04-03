@@ -6,34 +6,35 @@ on:
       - qa
       - staging
       - prod
+    paths:
+      - "force-app/**"
 
 jobs:
-  deploy-package-and-config:
+  deploy-to-target-org:
     runs-on: ubuntu-latest
 
     env:
       TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
-      TARGET_ORG_ID: ${{ secrets.TARGET_SANDBOX_ORG_ID }}
-      DEV_HUB_AUTH_URL: ${{ secrets.DEV_HUB_AUTH_URL }}
-      DEV_SANDBOX_AUTH_URL: ${{ secrets.DEV_SANDBOX_AUTH_URL }}
+      TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
+      TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 
       TEMP_MANIFEST: "tempDeployManifest.xml"
       DEPLOY_WAIT: 10
-      VALIDATED_JOB_ID: ""   
+      VALIDATED_JOB_ID: ""
       SOURCE_DIR: "force-app"
 
     steps:
       # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       # 2. Install Node.js
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          
+          node-version: "20"
+          cache: "npm"
+
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
@@ -42,12 +43,12 @@ jobs:
 
       # 4. Authenticate to Target Org
       - name: Authenticate to Target Org
-        run: |          
+        run: |
           AUTH_FILE=$(mktemp)
-          echo "$DEV_HUB_AUTH_URL" > "$AUTH_FILE"
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$DEV_HUB_TARGET_ALIAS" --set-default-dev-hub
+          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
+          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
           rm "$AUTH_FILE"          
-      
+
            ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
 
           if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
@@ -62,7 +63,7 @@ jobs:
 
       # 6. Validate Against Target Org and Run Local Apex Tests
       - name: Validate Against Target Org and Run Local Apex Tests
-        run: |    
+        run: |
           VALIDATE_JSON=$(sf project deploy validate \
             --manifest "$TEMP_MANIFEST" \
             --target-org "$TARGET_ALIAS" \
@@ -70,7 +71,7 @@ jobs:
             --wait "$DEPLOY_WAIT" \
             --json || true
             )
-          
+
           read STATUS VALIDATED_JOB_ID < <(
               echo "$VALIDATE_JSON" | node -pe "
                   const j = JSON.parse(require('fs').readFileSync(0));
@@ -79,38 +80,38 @@ jobs:
                   status + ' ' + jobId;
               "
           )
-      
+
           echo "VALIDATED_JOB_ID: $VALIDATED_JOB_ID"
           echo "STATUS: $STATUS"
-      
+
           if [[ "$STATUS" != "Succeeded" ]]; then
               echo "❌ Validation failed: $STATUS"
               echo "VALIDATE RESPONSE JSON: $VALIDATE_JSON"
               exit 1
           fi
-      
+
           echo "✅ Validation passed"
 
       #7. Run LWC tests
       - name: Run LWC tests
-        run: |           
+        run: |
           npm ci
 
           set -o pipefail
           npx lwc-jest 2>&1
           LWC_EXIT_CODE=$?
-      
+
           echo "LWC_EXIT_CODE: $LWC_EXIT_CODE"
-      
+
           if [ $LWC_EXIT_CODE -ne 0 ]; then
               echo "❌ LWC tests failed"
               exit $LWC_EXIT_CODE
           fi
-      
+
           echo "✅ LWC tests passed"
 
-      # 8. Authenticate and deploy metadata to Dev org
-      - name: Deploy Metadata to Dev Org
+      # 8. Authenticate and deploy metadata to Target org
+      - name: Deploy Metadata to Target Org
         run: |
           DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
 
@@ -120,12 +121,12 @@ jobs:
               const j = JSON.parse(require('fs').readFileSync(0));
               j.result?.status || 'Unknown';
           ")
-      
+
           if [[ $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
               exit 1
           fi
-      
+
           echo "✅ Deployment Status: $STATUS"
 
           echo "🎉 Deployment pipeline completed successfully!"
@@ -136,8 +137,8 @@ jobs:
         run: |
           echo "🔹 Cleaning up: Logging out from $TARGET_ALIAS..."
           sf org logout --target-org "$TARGET_ALIAS" --no-prompt || true
-        
+
           echo "🔹 Cleaning up: Deleting temporary manifest file..."
           [[ -f "$TEMP_MANIFEST" ]] && rm -f "$TEMP_MANIFEST"
-        
+
           echo "✅ Cleanup complete"
