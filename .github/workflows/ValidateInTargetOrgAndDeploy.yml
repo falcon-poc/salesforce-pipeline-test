@@ -120,7 +120,8 @@ jobs:
         run: |
           echo "Validated Job ID: $VALIDATED_JOB_ID"
 
-          DEPLOY_CMD=(sf project deploy quick --job-id "0AfWG01000FkbC20AJ" --json)
+          # DEPLOY_CMD=(sf project deploy quick --job-id "0AfWG01000FkbC20AJ" --json)
+          DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
 
           set +e
 
