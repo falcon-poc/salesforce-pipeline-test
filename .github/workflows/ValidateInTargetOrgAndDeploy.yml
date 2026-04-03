@@ -121,14 +121,19 @@ jobs:
 
           DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
 
+          set +e
+
           DEPLOY_JSON=$("${DEPLOY_CMD[@]}")
+          EXIT_CODE=$?
+
+          set -e
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
               j.result?.status || 'Unknown';
           ")
 
-          if [[ $STATUS != "Succeeded" ]]; then
+          if [[ $EXIT_CODE -ne 0 || $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
               exit 1
           fi
