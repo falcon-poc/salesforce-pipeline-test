@@ -13,6 +13,8 @@ jobs:
   deploy-to-target-org:
     runs-on: ubuntu-latest
 
+    environment: ${{ github.ref_name }}
+
     env:
       TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
