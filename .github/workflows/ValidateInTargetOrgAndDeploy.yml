@@ -123,28 +123,30 @@ jobs:
           # DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
           # DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
 
-          DEPLOY_CMD=(sf project deploy \
+          # echo "DEPLOY CMD: ${DEPLOY_CMD[@]}"
+
+          # set +e
+
+          # DEPLOY_JSON=$("${DEPLOY_CMD[@]}")
+          # EXIT_CODE=$?
+
+          # set -e
+
+          DEPLOY_JSON=$(sf project deploy start \
             --manifest "$TEMP_MANIFEST" \
             --target-org "$TARGET_ALIAS" \
-            --test-level NoTestRun \
+            --test-level RunLocalTests \
             --wait "$DEPLOY_WAIT" \
             --json || true)
 
-          echo "DEPLOY CMD: ${DEPLOY_CMD[@]}"
-
-          set +e
-
-          DEPLOY_JSON=$("${DEPLOY_CMD[@]}")
-          EXIT_CODE=$?
-
-          set -e
+          echo "DEPLOY JSON: $DEPLOY_JSON"
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
               j.result?.status || 'Unknown';
           ")
 
-          if [[ $EXIT_CODE -ne 0 || $STATUS != "Succeeded" ]]; then
+          if [[ $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
               echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
               exit $EXIT_CODE
