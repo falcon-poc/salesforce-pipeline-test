@@ -41,6 +41,7 @@ jobs:
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
+          echo "Validating PR merge from source branch: ${{ github.ref_name }} to target branch: ${{ github.event.pull_request.base.ref }}"
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
@@ -67,6 +68,8 @@ jobs:
         run: |
           AUTH_FILE=$(mktemp)
           echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
+          echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
+
           sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
           rm "$AUTH_FILE"          
 
