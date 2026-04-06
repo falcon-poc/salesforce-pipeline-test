@@ -41,6 +41,7 @@ jobs:
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
+          echo "Deploying to target branch: ${{ github.event.pull_request.base.ref }}"
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 

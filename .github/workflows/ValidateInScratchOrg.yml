@@ -38,10 +38,29 @@ jobs:
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
+          echo "Validating PR merge from source branch: ${{ github.event.pull_request.head.ref }} to target branch: ${{ github.event.pull_request.base.ref }}"
           sudo npm install @salesforce/cli --global
           sf --version
 
-      # 4. Authenticate to Dev Hub
+      # 4. Run LWC tests
+      - name: Run LWC tests
+        run: |
+          echo "--- Running LWC tests ---"
+
+          npm ci
+          set -o pipefail
+          npx lwc-jest 2>&1
+          LWC_EXIT_CODE=$?
+
+          if [ $LWC_EXIT_CODE -ne 0 ]; then
+              echo "❌ LWC tests failed"
+              exit $LWC_EXIT_CODE
+          fi
+
+          echo "--- ✅ All LWC tests passed ---"
+          echo "✅ Validation and Deployment Complete!"
+
+      # 5. Authenticate to Dev Hub
       - name: Authenticate to Dev Hub
         run: |
           echo "--- Authenticating with Salesforce Org using sfdx Auth URL ---"
@@ -58,7 +77,7 @@ jobs:
               exit 1
           fi
 
-      # 5. Create scratch org for validation/testing
+      # 6. Create scratch org for validation/testing
       - name: Create Scratch Org
         run: |
           echo "Creating Scratch Org..."
@@ -90,14 +109,14 @@ jobs:
 
           echo "✅ Scratch org created successfully"
 
-      # 6. Deploy Metadata to Scratch Org
+      # 7. Deploy Metadata to Scratch Org
       - name: Deploy Metadata to Scratch Org
         run: |
           echo "🔹 Deploying to Scratch org '$SCRATCH_ORG_ALIAS'..."
 
           sf project deploy start --target-org $SCRATCH_ORG_ALIAS --source-dir force-app --wait 10
 
-      #7. Run Apex tests
+      # 8. Run Apex tests
       - name: Run Apex tests
         run: |
           echo "--- Running Apex tests ---"
@@ -114,50 +133,9 @@ jobs:
 
           echo "--- All Apex tests passed ---"
 
-      #8. Run LWC tests
-      - name: Run LWC tests
-        run: |
-          echo "--- Running LWC tests ---"
-
-          npm ci
-          set -o pipefail
-          npx lwc-jest 2>&1
-          LWC_EXIT_CODE=$?
-
-          if [ $LWC_EXIT_CODE -ne 0 ]; then
-              echo "❌ LWC tests failed"
-              exit $LWC_EXIT_CODE
-          fi
-
-          echo "--- ✅ All LWC tests passed ---"
-          echo "✅ Validation and Deployment Complete!"
-
-      # 9. Authenticate and deploy metadata to Dev org
-      - name: Deploy Metadata to Dev Org
-        run: |
-          echo "--- Authenticating to Dev Sandbox ---"          
-
-          AUTH_FILE=$(mktemp)
-          echo "$DEV_SANDBOX_AUTH_URL" > "$AUTH_FILE"
-
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_SANDBOX_ALIAS"
-          rm "$AUTH_FILE"
-
-          ACTUAL_SANDBOX_ORG_ID=$(sf org display --target-org "$TARGET_SANDBOX_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-          echo "ACTUAL_SANDBOX_ORG_ID: $ACTUAL_SANDBOX_ORG_ID"
-               
-          if [ "${ACTUAL_SANDBOX_ORG_ID:0:15}" != "${TARGET_SANDBOX_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
-
-          echo "--- Deploying to Dev Sandbox ---"
-
-          sf project deploy start --target-org $TARGET_SANDBOX_ALIAS --source-dir force-app --wait 10
-
           echo "🎉 Deployment pipeline completed successfully!"
 
-      # 10. Cleanup
+      # 9. Cleanup
       - name: Cleanup
         if: always()
         run: |
@@ -167,8 +145,8 @@ jobs:
           echo "🔹 Cleaning up: Logging out from Dev Hub: $DEV_HUB_TARGET_ALIAS..."
           sf org logout --target-org "$DEV_HUB_TARGET_ALIAS" --no-prompt || true
 
-          echo "🔹 Cleaning up: Logging out from Dev Sandbox: $TARGET_SANDBOX_ALIAS..."
-          sf org logout --target-org "$TARGET_SANDBOX_ALIAS" --no-prompt || true
+          # echo "🔹 Cleaning up: Logging out from Dev Sandbox: $TARGET_SANDBOX_ALIAS..."
+          # sf org logout --target-org "$TARGET_SANDBOX_ALIAS" --no-prompt || true
 
           echo "🔹 Cleaning up: Deleting apex test results..."
           rm -f -v test-results.json
