@@ -1,7 +1,8 @@
 name: Salesforce CI/CD - Validate against scratch org and deploy
 
 on:
-  push:
+  pull_request:
+    types: [opened, reopened, synchronize]
     branches:
       - dev
     paths:
