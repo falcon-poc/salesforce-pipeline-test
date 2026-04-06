@@ -14,13 +14,11 @@ jobs:
 
     env:
       DEV_HUB_ORG_ID: ${{ secrets.DEV_HUB_ORG_ID }}
-      DEV_HUB_TARGET_ALIAS: ${{ secrets.DEV_HUB_TARGET_ALIAS }}
-      SCRATCH_ORG_ALIAS: ${{ secrets.SCRATCH_ORG_ALIAS }}
-      TARGET_SANDBOX_ALIAS: ${{ secrets.TARGET_SANDBOX_ALIAS }}
-      TARGET_SANDBOX_ORG_ID: ${{ secrets.TARGET_SANDBOX_ORG_ID }}
       DEV_HUB_AUTH_URL: ${{ secrets.DEV_HUB_AUTH_URL }}
-      DEV_SANDBOX_AUTH_URL: ${{ secrets.DEV_SANDBOX_AUTH_URL }}
 
+      DEV_HUB_TARGET_ALIAS: ${{ github.event.pull_request.head.ref }}-dev-hub-alias
+
+      SCRATCH_ORG_ALIAS: ${{ github.event.pull_request.head.ref }}-scratch-validate
       SCRATCH_ORG_DEFINITION: "./config/scratch-org-def.json"
       SOURCE_DIR: "force-app"
 
@@ -144,10 +142,7 @@ jobs:
           sf org delete scratch --target-org "$SCRATCH_ORG_ALIAS" --no-prompt
 
           echo "🔹 Cleaning up: Logging out from Dev Hub: $DEV_HUB_TARGET_ALIAS..."
-          sf org logout --target-org "$DEV_HUB_TARGET_ALIAS" --no-prompt || true
-
-          # echo "🔹 Cleaning up: Logging out from Dev Sandbox: $TARGET_SANDBOX_ALIAS..."
-          # sf org logout --target-org "$TARGET_SANDBOX_ALIAS" --no-prompt || true
+          sf org logout --target-org "$DEV_HUB_TARGET_ALIAS" --no-prompt || true        
 
           echo "🔹 Cleaning up: Deleting apex test results..."
           rm -f -v test-results.json
