@@ -1,5 +1,5 @@
 public with sharing class aaaaaaa {
   public aaaaaaa() {
   }
-  public string newValue = 'new Value to force qa deploy';
+  public string newValue = 'a new Value to force qa deploy';
 }

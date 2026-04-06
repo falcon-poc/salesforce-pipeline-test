@@ -120,8 +120,15 @@ jobs:
         run: |
           echo "Validated Job ID: $VALIDATED_JOB_ID"
 
-          DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
+          # DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
           # DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
+
+          DEPLOY_CMD=(sf project deploy \
+            --manifest "$TEMP_MANIFEST" \
+            --target-org "$TARGET_ALIAS" \
+            --test-level NoTestRun \
+            --wait "$DEPLOY_WAIT" \
+            --json || true)
 
           echo "DEPLOY CMD: ${DEPLOY_CMD[@]}"
 
