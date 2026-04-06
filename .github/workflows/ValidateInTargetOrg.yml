@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against target org and deploy
+name: Salesforce CI/CD - Validate against target org
 
 on:
   pull_request:
@@ -11,13 +11,13 @@ on:
       - "force-app/**"
 
 jobs:
-  deploy-to-target-org:
+  validate-against-target-org:
     runs-on: ubuntu-latest
 
     environment: ${{ github.event.pull_request.base.ref }}
 
     env:
-      TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
+      TARGET_ALIAS: ${{ github.event.pull_request.base.ref }}-validate-pipeline
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
       TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 

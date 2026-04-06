@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against target org and deploy
+name: Salesforce CI/CD - Deploy to target org
 
 on:
   push:
@@ -14,10 +14,11 @@ jobs:
   deploy-to-target-org:
     runs-on: ubuntu-latest
 
-    environment: ${{ github.event.pull_request.base.ref }}
+    environment: ${{ github.ref_name }}
 
     env:
-      TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
+      TARGET_ALIAS: ${{ github.ref_name }}-deploy-pipeline
+
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
       TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 
@@ -41,7 +42,7 @@ jobs:
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
-          echo "Deploying to target branch: ${{ github.event.pull_request.base.ref }}"
+          echo "Deploying to target branch: ${{ github.ref_name }}"
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
@@ -73,6 +74,9 @@ jobs:
 
            ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
 
+          echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
+          echo "TARGET_ORG_ID: $TARGET_ORG_ID"
+
           if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
               echo "--- Authentication failed. Exiting script. ---"
               exit 1
@@ -103,7 +107,7 @@ jobs:
           if [[ $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
               echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
-              exit $EXIT_CODE
+              exit 1
           fi
 
           echo "✅ Deployment Status: $STATUS"
