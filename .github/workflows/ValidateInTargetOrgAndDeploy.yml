@@ -139,7 +139,7 @@ jobs:
             --wait "$DEPLOY_WAIT" \
             --json || true)
 
-          echo "DEPLOY JSON: $DEPLOY_JSON"
+          # echo "DEPLOY JSON: $DEPLOY_JSON"
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
