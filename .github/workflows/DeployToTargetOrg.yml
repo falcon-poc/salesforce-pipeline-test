@@ -106,7 +106,7 @@ jobs:
           if [[ $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
               echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
-              exit $EXIT_CODE
+              exit 1
           fi
 
           echo "✅ Deployment Status: $STATUS"
