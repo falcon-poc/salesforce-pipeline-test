@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against scratch org and deploy
+name: Salesforce CI/CD - Validate against scratch org
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - "force-app/**"
 
 jobs:
-  deploy-package-and-config:
+  validate-against-scratch-org:
     runs-on: ubuntu-latest
 
     env:

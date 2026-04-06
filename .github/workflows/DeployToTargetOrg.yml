@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against target org and deploy
+name: Salesforce CI/CD - Deploy to target org
 
 on:
   push:
