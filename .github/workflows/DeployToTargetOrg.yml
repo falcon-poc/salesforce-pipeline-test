@@ -14,7 +14,7 @@ jobs:
   deploy-to-target-org:
     runs-on: ubuntu-latest
 
-    environment: ${{ github.event.pull_request.base.ref }}
+    environment: ${{ github.ref_name }}
 
     env:
       TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
@@ -41,7 +41,7 @@ jobs:
       # 3. Install Salesforce CLI
       - name: Install Salesforce CLI
         run: |
-          echo "Deploying to target branch: ${{ github.event.pull_request.base.ref }}"
+          echo "Deploying to target branch: ${{ github.ref_name }}"
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
