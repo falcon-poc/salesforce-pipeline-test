@@ -16,7 +16,7 @@ jobs:
       DEV_HUB_ORG_ID: ${{ secrets.DEV_HUB_ORG_ID }}
       DEV_HUB_AUTH_URL: ${{ secrets.DEV_HUB_AUTH_URL }}
 
-      DEV_HUB_TARGET_ALIAS: ${{ github.event.pull_request.head.ref }}-dev-hub-alias
+      DEV_HUB_TARGET_ALIAS: ${{ github.event.pull_request.head.ref }}-scratch-validate-pipeline
 
       SCRATCH_ORG_ALIAS: ${{ github.event.pull_request.head.ref }}-scratch-validate
       SCRATCH_ORG_DEFINITION: "./config/scratch-org-def.json"

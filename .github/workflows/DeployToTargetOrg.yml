@@ -17,7 +17,8 @@ jobs:
     environment: ${{ github.ref_name }}
 
     env:
-      TARGET_ALIAS: ${{ secrets.TARGET_ALIAS }}
+      TARGET_ALIAS: ${{ github.ref_name }}-deploy-pipeline
+
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
       TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 
