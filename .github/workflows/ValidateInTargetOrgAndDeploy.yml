@@ -43,61 +43,7 @@ jobs:
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
-      # 4. Authenticate to Target Org
-      - name: Authenticate to Target Org
-        run: |
-          AUTH_FILE=$(mktemp)
-          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-          rm "$AUTH_FILE"          
-
-           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
-
-      # 5. Generate Manifest file
-      - name: Generate Manifest file
-        run: |
-          sf project generate manifest --source-dir "$SOURCE_DIR" --name "$TEMP_MANIFEST"
-
-      # 6. Validate Against Target Org and Run Local Apex Tests
-      - name: Validate Against Target Org and Run Local Apex Tests
-        run: |
-          VALIDATE_JSON=$(sf project deploy validate \
-            --manifest "$TEMP_MANIFEST" \
-            --target-org "$TARGET_ALIAS" \
-            --test-level RunLocalTests \
-            --wait "$DEPLOY_WAIT" \
-            --json || true
-            )
-
-          read STATUS VALIDATED_JOB_ID < <(
-              echo "$VALIDATE_JSON" | node -pe "
-                  const j = JSON.parse(require('fs').readFileSync(0));
-                  const status = j.result?.status ?? 'Unknown';
-                  const jobId = j.result?.id || '';
-                  status + ' ' + jobId;
-              "
-          )
-
-          echo "VALIDATED_JOB_ID: $VALIDATED_JOB_ID"
-          echo "STATUS: $STATUS"
-          echo "VALIDATE RESPONSE JSON: $VALIDATE_JSON"
-
-          echo "VALIDATED_JOB_ID=$VALIDATED_JOB_ID" >> $GITHUB_ENV
-
-          if [[ "$STATUS" != "Succeeded" ]]; then
-              echo "❌ Validation failed: $STATUS"
-              echo "VALIDATE RESPONSE JSON: $VALIDATE_JSON"
-              exit 1
-          fi
-
-          echo "✅ Validation passed"
-
-      #7. Run LWC tests
+      #4. Run LWC tests
       - name: Run LWC tests
         run: |
           npm ci
@@ -115,22 +61,30 @@ jobs:
 
           echo "✅ LWC tests passed"
 
-      # 8. Authenticate and deploy metadata to Target org
+      # 5. Authenticate to Target Org
+      - name: Authenticate to Target Org
+        run: |
+          AUTH_FILE=$(mktemp)
+          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
+          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
+          rm "$AUTH_FILE"          
+
+           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+
+          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
+              echo "--- Authentication failed. Exiting script. ---"
+              exit 1
+          fi
+
+      # 6. Generate Manifest file
+      - name: Generate Manifest file
+        run: |
+          sf project generate manifest --source-dir "$SOURCE_DIR" --name "$TEMP_MANIFEST"
+
+      # 7. Authenticate and deploy metadata to Target org
       - name: Deploy Metadata to Target Org
         run: |
-          echo "Validated Job ID: $VALIDATED_JOB_ID"
-
-          # DEPLOY_CMD=(sf project deploy quick --job-id "$VALIDATED_JOB_ID" --json)
-          # DEPLOY_CMD=(sf project deploy quick --use-most-recent --json)
-
-          # echo "DEPLOY CMD: ${DEPLOY_CMD[@]}"
-
-          # set +e
-
-          # DEPLOY_JSON=$("${DEPLOY_CMD[@]}")
-          # EXIT_CODE=$?
-
-          # set -e
+          echo "--- Beginning full deploy to target org ---"
 
           DEPLOY_JSON=$(sf project deploy start \
             --manifest "$TEMP_MANIFEST" \
@@ -138,8 +92,6 @@ jobs:
             --test-level RunLocalTests \
             --wait "$DEPLOY_WAIT" \
             --json || true)
-
-          # echo "DEPLOY JSON: $DEPLOY_JSON"
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
@@ -156,7 +108,7 @@ jobs:
 
           echo "🎉 Deployment pipeline completed successfully!"
 
-      # 9. Cleanup
+      # 8. Cleanup
       - name: Cleanup
         if: always()
         run: |
