@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Deploy to target org
+name: Salesforce CI/CD - Deploy to target org - ${{ github.ref_name }}
 
 on:
   push:

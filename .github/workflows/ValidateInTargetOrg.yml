@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against target org
+name: Salesforce CI/CD - Validate against target org - ${{ github.event.pull_request.base.ref }}
 
 on:
   pull_request:

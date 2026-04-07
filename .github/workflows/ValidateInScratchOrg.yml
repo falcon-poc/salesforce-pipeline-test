@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against scratch org
+name: Salesforce CI/CD - Validate against scratch org - ${{ github.event.pull_request.head.ref }}
 
 on:
   pull_request:
