@@ -14,6 +14,7 @@ run-name: Deploy to target org - ${{ github.ref_name }}
 
 jobs:
   deploy-to-target-org:
+    name: Deploy to target org - ${{ github.ref_name }}
     runs-on: ubuntu-latest
 
     environment: ${{ github.ref_name }}
