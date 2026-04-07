@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against target org - ${{ github.event.pull_request.base.ref }}
+name: Salesforce CI/CD - Validate against target org
 
 on:
   pull_request:
@@ -9,6 +9,8 @@ on:
       - prod
     paths:
       - "force-app/**"
+
+run-name: Validate against target org - ${{ github.event.pull_request.base.ref }}
 
 jobs:
   validate-against-target-org:

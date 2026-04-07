@@ -1,4 +1,4 @@
-name: Salesforce CI/CD - Validate against scratch org - ${{ github.event.pull_request.head.ref }}
+name: Salesforce CI/CD - Validate against scratch org
 
 on:
   pull_request:
@@ -8,8 +8,11 @@ on:
     paths:
       - "force-app/**"
 
+run-name: Validate against scratch org - ${{ github.event.pull_request.head.ref }}
+
 jobs:
   validate-against-scratch-org:
+    name: Validate against scratch org - ${{ github.event.pull_request.head.ref }}
     runs-on: ubuntu-latest
 
     env:
