@@ -10,8 +10,11 @@ on:
     paths:
       - "force-app/**"
 
+run-name: Validate against target org - ${{ github.event.pull_request.base.ref }}
+
 jobs:
   validate-against-target-org:
+    name: Validate against target org - ${{ github.event.pull_request.base.ref }}
     runs-on: ubuntu-latest
 
     environment: ${{ github.event.pull_request.base.ref }}
