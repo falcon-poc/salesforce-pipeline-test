@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomMetadata
+  xmlns="http://soap.sforce.com/2006/04/metadata"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+    <label>Compliance Status</label>
+    <protected>false</protected>
+    <values>
+        <field>APIName__c</field>
+        <value xsi:type="xsd:string">compliance_status</value>
+    </values>
+    <values>
+        <field>DataType__c</field>
+        <value xsi:type="xsd:string">Boolean</value>
+    </values>
+    <values>
+        <field>DefaultLabel__c</field>
+        <value xsi:type="xsd:string">Compliance Status</value>
+    </values>
+    <values>
+        <field>RegionalsKey__c</field>
+        <value xsi:nil="true" />
+    </values>
+    <values>
+        <field>RelatedObject__c</field>
+        <value xsi:nil="true" />
+    </values>
+    <values>
+        <field>RelatedPicklist__c</field>
+        <value xsi:nil="true" />
+    </values>
+    <values>
+        <field>TargetField__c</field>
+        <value xsi:type="xsd:string">Value_Boolean__c</value>
+    </values>
+    <values>
+        <field>TargetObject__c</field>
+        <value xsi:type="xsd:string">ProgramQuoteDriver__c</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>aaa_Test_Custom_Label</fullName>
+        <categories>Category 5</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>aaa Test Custom Label</shortDescription>
+        <value>aaa Test Custom Label value</value>
+    </labels>
+    <labels>
+        <fullName>bbbbb_Test_Label</fullName>
+        <categories>Category 4</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>bbbbb Test Label</shortDescription>
+        <value>bbbbb Test Label value</value>
+    </labels>
+</CustomLabels>
