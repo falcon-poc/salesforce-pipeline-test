@@ -21,6 +21,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+#Temporary files for drift detection
+tmp-drift/
+
 # Dependency directories
 node_modules/
 

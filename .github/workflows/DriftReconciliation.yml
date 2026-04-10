@@ -1,0 +1,46 @@
+name: Reconcile Drift
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect-drift:
+    name: Detect and report drift
+    runs-on: ubuntu-latest
+
+    env:
+      TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.1"
+
+      - name: Install Salesforce CLI
+        run: sudo npm install @salesforce/cli@2.128.5 --global
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run drift detection
+        run: bash deploy_shells/drift.sh
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf sf-drift
