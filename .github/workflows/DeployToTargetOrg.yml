@@ -55,7 +55,7 @@ jobs:
           npm ci
 
           set -o pipefail
-          npx lwc-jest --passWithNoTests 2>&1
+          npx lwc-jest -- --passWithNoTests 2>&1
           LWC_EXIT_CODE=$?
 
           echo "LWC_EXIT_CODE: $LWC_EXIT_CODE"
