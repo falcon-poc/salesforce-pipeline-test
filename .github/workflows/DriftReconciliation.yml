@@ -88,6 +88,7 @@ jobs:
           sf project generate manifest \
             --from-org "$TARGET_ALIAS" \
             --metadata "ApexClass" \
+            --metadata "CustomObject" \
             --metadata "CustomField" \
             --metadata "LightningComponentBundle" \
             --metadata "PermissionSet" \

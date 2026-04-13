@@ -1,5 +1,8 @@
 # Keep only non-namespaced custom fields
 !CustomField/*.*__c
+!CustomObject/*__c
+!CustomObject/*__mdt
+!CustomObject/*__e
 CustomField/*.*__*__c
 
 # Managed package objects and their fields
