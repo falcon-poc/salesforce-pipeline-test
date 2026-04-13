@@ -46,6 +46,10 @@ jobs:
       - name: Install Salesforce CLI
         run: sudo npm install @salesforce/cli@2.128.5 --global
 
+      - name: Install Prettier
+        run: |
+          npm ci
+
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
@@ -234,6 +238,9 @@ jobs:
               cd "$TMP_DIR/org" || exit 1
               find . -type f ! -name "package.xml" -exec cp --parents -t "$DEST_ABSOLUTE_PATH" {} +
           )
+
+      - name: Run Prettier on New Repo Files
+        run: npx prettier --write
 
       - name: Commit and Push Drift Branch
         run: |
