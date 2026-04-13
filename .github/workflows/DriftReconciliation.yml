@@ -2,7 +2,7 @@ name: Reconcile Drift
 
 on:
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 permissions:
@@ -11,12 +11,23 @@ permissions:
 
 jobs:
   detect-drift:
-    name: Detect and report drift
+    name: Detect and Report State Drift
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev]
+
+    environment: ${{ matrix.environment }}
 
     env:
       TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO_DIR: "force-app"
+      ORG_PACKAGE_XML: ""
+      IGNORE_FILE: ".drift-ignore"
+      BASE_BRANCH: "dev"
+      DRIFT_BRANCH: "drift/reconciliation-${{ date +%Y%m%d_%H%M%S }}"
+      TMP_DIR: "tmp-drift"
 
     steps:
       - name: Checkout repository
@@ -38,9 +49,232 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run drift detection
-        run: bash deploy_shells/drift.sh
+      - name: Create Temp Directory
+        run: mkdir -p "$TMP_DIR" "$TMP_DIR/repo" "$TMP_DIR/org"
+
+      - name: Verify Auth
+        run: |
+          AUTH_FILE=$(mktemp)
+          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
+          echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
+
+          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
+          rm "$AUTH_FILE"          
+
+           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+
+          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
+              echo "--- Authentication failed. Exiting script. ---"
+              exit 1
+          fi
+
+      - name: Generate Source Branch Manifest
+        run: |
+          sf project generate manifest \
+          --source-dir "$REPO_DIR" \
+          --output-dir "$TMP_DIR/repo"
+
+      - name: Generate Target Org Manifest
+        run: |
+          sf project generate manifest \
+            --from-org "$TARGET_ALIAS" \
+            --metadata "ApexClass" \
+            --metadata "CustomField" \
+            --metadata "LightningComponentBundle" \
+            --metadata "PermissionSet" \
+            --metadata "PermissionSetGroup" \
+            --metadata "FlexiPage" \
+            --metadata "Layout" \
+            --metadata "CompactLayout" \
+            --metadata "Flow" \
+            --metadata "FlowDefinition" \
+            --metadata "Workflow" \
+            --metadata "ApprovalProcess" \
+            --metadata "NavigationMenu" \
+            --metadata "RecordType" \
+            --metadata "ValidationRule" \
+            --metadata "RecordType" \
+            --metadata "CustomLabel" \
+            --metadata "StandardValueSet" \
+            --metadata "GlobalValueSet" \
+            --output-dir "$TMP_DIR/org"
+
+          ORG_PACKAGE_XML="$TMP_DIR/org/package.xml"
+
+      - name: Filter Target Org Manifest
+        run: |
+          local manifest="$ORG_PACKAGE_XML"
+          local tmpfile="${manifest}.tmp"
+
+          local -A known_types=()
+          local line pattern is_keep type_name instance_name
+
+          while IFS= read -r line || [ -n "$line" ]; do
+
+              #remove Windows CRLF characters
+              pattern="${line%$'\r'}"
+
+              #trim whitespace
+              pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+              pattern="${pattern%"${pattern##*[![:space:]]}"}"
+
+              #skip empty lines or lines starting with #
+              [[ -z "$pattern" || "$pattern" == \#* ]] && continue
+
+              #check if pattern is a keep-only pattern
+              is_keep=0
+              if [[ "$pattern" == '!'* ]]; then
+                  is_keep=1
+                  pattern="${pattern#!}"
+              fi
+
+              #extract type name and member glob
+              type_name="${pattern%%/*}"
+              instance_name="${pattern#*/}" 
+
+              #add type name to known types
+              known_types["$type_name"]=1
+
+              #add member glob to keep-only or exclude arrays
+              if [[ $is_keep -eq 1 ]]; then
+                  eval "_ko_${type_name}+=(\"$instance_name\")"
+              else
+                  eval "_ex_${type_name}+=(\"$instance_name\")"
+              fi
+
+          done < "$IGNORE_FILE"
+
+          #initialize counters and buffer
+          local before=0 after=0
+          local -a member_buffer=()
+
+          #read each line of the manifest 
+          while IFS= read -r line; do
+              #check if line is a members tag
+              if [[ "$line" =~ \<members\>(.*)\</members\> ]]; then
+                  ((before++))
+                  member_buffer+=("$line")
+                  continue
+              fi
+
+              #check if line is a name tag
+              if [[ "$line" =~ \<name\>(.*)\</name\> ]]; then
+                  #extract type name
+                  local current_type="${BASH_REMATCH[1]}"
+
+                  #process each member line
+                  for mline in "${member_buffer[@]}"; do
+                      #check if line is a members tag
+                      [[ "$mline" =~ \<members\>(.*)\</members\> ]]
+                      local member="${BASH_REMATCH[1]}"
+                      local keep=1
+
+                      #get keep-only array for current type
+                      local ko_ref="_ko_${current_type}[@]"
+                      local ko_arr=("${!ko_ref}")
+                      if [[ ${#ko_arr[@]} -gt 0 && -n "${ko_arr[0]}" ]]; then
+                          keep=0
+                          #check if member matches any keep-only pattern
+                          for pat in "${ko_arr[@]}"; do
+                              if [[ "$member" == $pat ]]; then keep=1; break; fi
+                          done
+                      fi
+
+                      #check if member matches any exclude pattern
+                      if [[ $keep -eq 1 ]]; then
+                          #get exclude array for current type
+                          local ex_ref="_ex_${current_type}[@]"
+                          for pat in "${!ex_ref}"; do
+                              if [[ "$member" == $pat ]]; then keep=0; break; fi
+                          done
+                      fi
+
+                      if [[ $keep -eq 1 ]]; then
+                          #add line to output buffer
+                          echo "$mline"
+                          #increment counter
+                          ((after++))
+                      fi
+                  done
+                  member_buffer=()
+                  #add line to output buffer
+                  echo "$line"
+                  #increment counter
+                  ((after++))
+                  continue
+              fi
+
+              echo "$line"
+          done < "$manifest" > "$tmpfile"
+
+          mv "$tmpfile" "$manifest"
+
+      - name: Retrieve Filtered Target Org Metadata
+        run: |
+          sf project retrieve start \
+            --target-org "$TARGET_ALIAS" \
+            --manifest "$ORG_PACKAGE_XML" \
+            --output-dir "$TMP_DIR/org" \
+            --ignore-conflicts
+
+      - name: Create Drift Branch
+        run: git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"
+
+      - name: Replace Branch Metadata with Retrieved Org Contents
+        run: |
+          local DEST_ABSOLUTE_PATH
+          DEST_ABSOLUTE_PATH=$(pwd)/"$REPO_DIR/main/default"
+
+          rm -rf "$REPO_DIR/main/default"
+          mkdir -p "$REPO_DIR/main/default"
+          (
+              cd "$TMP_DIR/org" || exit 1
+              find . -type f ! -name "package.xml" -exec cp --parents -t "$DEST_ABSOLUTE_PATH" {} +
+          )
+
+      - name: Commit and Push Drift Branch
+        run: |
+          git add -A "$REPO_DIR/"
+
+          if git diff --cached --quiet; then
+              echo "No drift detected."
+              return 0
+          fi
+
+          local file_summary
+          file_summary=$(git diff --cached --stat)
+
+          git commit -m "drift: reconciliation $(date +%Y-%m-%d)"
+
+          git push -u origin "$DRIFT_BRANCH" --force
+
+      - name: Create Drift Branch PR
+        run: |
+
+          if ! gh auth status &>/dev/null; then
+              echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
+              echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
+              return 0
+          fi
+
+          local pr_body
+          pr_body="## Drift Report
+
+              Automated drift detection between the Salesforce org and this repository.
+
+              ### Summary
+              \`\`\`
+              ${file_summary}
+              \`\`\`
+
+              Review the file changes in this PR to see exactly what has drifted."
+
+          gh pr create \
+              --base "$BASE_BRANCH" \
+              --head "$DRIFT_BRANCH" \
+              --title "Drift Reconciliation $(date +%Y-%m-%d)" \
+              --body "$pr_body"
 
       - name: Cleanup
         if: always()
-        run: rm -rf sf-drift
+        run: rm -rf "$TMP_DIR"
