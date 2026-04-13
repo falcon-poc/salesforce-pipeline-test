@@ -31,7 +31,7 @@ jobs:
       ORG_PACKAGE_XML: ""
       IGNORE_FILE: ".drift-ignore"
       BASE_BRANCH: "dev"
-      DRIFT_BRANCH: "drift/reconciliation-${{ date +%Y%m%d_%H%M%S }}"
+      DRIFT_BRANCH: ""
       TMP_DIR: "tmp-drift"
 
     steps:
@@ -53,6 +53,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set DRIFT_BRANCH
+        run: echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
       - name: Create Temp Directory
         run: mkdir -p "$TMP_DIR" "$TMP_DIR/repo" "$TMP_DIR/org"
