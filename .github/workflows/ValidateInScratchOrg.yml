@@ -82,20 +82,20 @@ jobs:
       # 6. Create scratch org for validation/testing
       - name: Create Scratch Org
         run: |
-          echo "Creating Scratch Org..."
 
-          ls -R
-          TMP_SCRATCH_ORG_DEF=$(mktemp)
+          echo "Adding Dev Hub Org ID to Scratch Org Definition..."
+          TMP_SCRATCH_ORG_DEF=$(mktemp)        
 
           node -e "
             const fs = require('fs'); 
-            const src = './config/project-scratch-def.json'; 
+            const src = './config/scratch-org-def.json'; 
             const tmp = process.env.TMP_SCRATCH_ORG_DEF; 
             const j = JSON.parse(fs.readFileSync(src,'utf8')); 
             j.sourceOrg = process.env.DEV_HUB_ORG_ID; 
             fs.writeFileSync(tmp, JSON.stringify(j,null,2));
           " > "$TMP_SCRATCH_ORG_DEF"
 
+          echo "Creating Scratch Org..."          
           CREATE_SCRATCH_ORG_JSON=$(
               sf org create scratch \
                   --definition-file "$TMP_SCRATCH_ORG_DEF" \
