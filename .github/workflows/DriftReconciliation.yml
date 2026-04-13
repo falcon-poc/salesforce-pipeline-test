@@ -25,7 +25,7 @@ jobs:
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_DIR: "force-app"
-      ORG_PACKAGE_XML: ""
+      ORG_PACKAGE_XML: "tmp-drift/org/package.xml"
       IGNORE_FILE: ".drift-ignore"
       BASE_BRANCH: "dev"
       DRIFT_BRANCH: ""
@@ -103,8 +103,6 @@ jobs:
             --metadata "StandardValueSet" \
             --metadata "GlobalValueSet" \
             --output-dir "$TMP_DIR/org"
-
-          ORG_PACKAGE_XML="$TMP_DIR/org/package.xml"
 
       - name: Filter Target Org Manifest
         run: |
@@ -243,7 +241,7 @@ jobs:
 
           if git diff --cached --quiet; then
               echo "No drift detected."
-              return 0
+              exit 0
           fi
 
           file_summary=$(git diff --cached --stat)
@@ -258,7 +256,7 @@ jobs:
           if ! gh auth status &>/dev/null; then
               echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
               echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
-              return 0
+              exit 0
           fi
 
           pr_body="## Drift Report
