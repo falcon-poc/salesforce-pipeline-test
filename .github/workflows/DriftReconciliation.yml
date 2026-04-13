@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: "0 7 * * *"
   workflow_dispatch:
-    inputs:
-      reason:
-        description: "Reason for manual run"
-        required: false
-        default: "Manual health check"
 
 permissions:
   contents: write
@@ -155,8 +150,9 @@ jobs:
           done < "$IGNORE_FILE"
 
           #initialize counters and buffer
-          before=0 after=0
-          -a member_buffer=()
+          before=0
+          after=0
+          declare -a member_buffer=()
 
           #read each line of the manifest 
           while IFS= read -r line; do
