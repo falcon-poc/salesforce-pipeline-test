@@ -84,7 +84,7 @@ jobs:
         run: |
 
           echo "Adding Dev Hub Org ID to Scratch Org Definition..."
-          TMP_SCRATCH_ORG_DEF=$(mktemp)        
+          export TMP_SCRATCH_ORG_DEF=$(mktemp)        
 
           node -e "
             const fs = require('fs'); 
