@@ -257,31 +257,31 @@ jobs:
 
           git push -u origin "$DRIFT_BRANCH" --force
 
-      - name: Create Drift Branch PR
-        run: |
+      # - name: Create Drift Branch PR
+      #   run: |
 
-          if ! gh auth status &>/dev/null; then
-              echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
-              echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
-              exit 0
-          fi
+      #     if ! gh auth status &>/dev/null; then
+      #         echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
+      #         echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
+      #         exit 0
+      #     fi
 
-          pr_body="## Drift Report
+      #     pr_body="## Drift Report
 
-              Automated drift detection between the Salesforce org and this repository.
+      #         Automated drift detection between the Salesforce org and this repository.
 
-              ### Summary
-              \`\`\`
-              ${file_summary}
-              \`\`\`
+      #         ### Summary
+      #         \`\`\`
+      #         ${file_summary}
+      #         \`\`\`
 
-              Review the file changes in this PR to see exactly what has drifted."
+      #         Review the file changes in this PR to see exactly what has drifted."
 
-          gh pr create \
-              --base "$BASE_BRANCH" \
-              --head "$DRIFT_BRANCH" \
-              --title "Drift Reconciliation $(date +%Y-%m-%d)" \
-              --body "$pr_body"
+      #     gh pr create \
+      #         --base "$BASE_BRANCH" \
+      #         --head "$DRIFT_BRANCH" \
+      #         --title "Drift Reconciliation $(date +%Y-%m-%d)" \
+      #         --body "$pr_body"
 
       - name: Cleanup
         if: always()
