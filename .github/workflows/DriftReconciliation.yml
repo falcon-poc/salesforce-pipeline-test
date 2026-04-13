@@ -156,7 +156,7 @@ jobs:
           while IFS= read -r line; do
               #check if line is a members tag
               if [[ "$line" =~ \<members\>(.*)\</members\> ]]; then
-                  ((before++))
+                  before=$((before + 1))
                   member_buffer+=("$line")
                   continue
               fi
@@ -197,14 +197,14 @@ jobs:
                           #add line to output buffer
                           echo "$mline"
                           #increment counter
-                          ((after++))
+                          after=$((after + 1))
                       fi
                   done
                   member_buffer=()
                   #add line to output buffer
                   echo "$line"
                   #increment counter
-                  ((after++))
+                  after=$((after + 1))
                   continue
               fi
 
