@@ -26,6 +26,7 @@ jobs:
 
     env:
       TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
+      TARGET_ALIAS: ${{ matrix.environment }}-drift-pipeline
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_DIR: "force-app"
       ORG_PACKAGE_XML: ""
