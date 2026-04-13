@@ -116,7 +116,7 @@ jobs:
           manifest="$ORG_PACKAGE_XML"
           tmpfile="${manifest}.tmp"
 
-          -A known_types=()
+          declare -A known_types=()
           declare line pattern is_keep type_name instance_name
 
           while IFS= read -r line || [ -n "$line" ]; do
