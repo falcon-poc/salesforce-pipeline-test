@@ -84,14 +84,15 @@ jobs:
         run: |
           echo "Creating Scratch Org..."
 
+          ls -R
           TMP_SCRATCH_ORG_DEF=$(mktemp)
 
           node -e "
-            const fs=require('fs'); 
-            const src='./config/project-scratch-def.json'; 
-            const tmp=process.env.TMP_SCRATCH_ORG_DEF; 
-            const j=JSON.parse(fs.readFileSync(src,'utf8')); 
-            j.sourceOrg=process.env.DEV_HUB_ORG_ID; 
+            const fs = require('fs'); 
+            const src = './config/project-scratch-def.json'; 
+            const tmp = process.env.TMP_SCRATCH_ORG_DEF; 
+            const j = JSON.parse(fs.readFileSync(src,'utf8')); 
+            j.sourceOrg = process.env.DEV_HUB_ORG_ID; 
             fs.writeFileSync(tmp, JSON.stringify(j,null,2));
           " > "$TMP_SCRATCH_ORG_DEF"
 
