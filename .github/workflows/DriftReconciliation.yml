@@ -63,12 +63,15 @@ jobs:
 
       - name: Verify Auth
         run: |
+          echo "${{ matrix.environment }}"
           AUTH_FILE=$(mktemp)
           echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
           echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
 
           sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
           rm "$AUTH_FILE"          
+          
+           echo $(sf org display --target-org "$TARGET_ALIAS" --json)
 
            ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
 
