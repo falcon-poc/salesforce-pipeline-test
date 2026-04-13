@@ -240,7 +240,7 @@ jobs:
           )
 
       - name: Run Prettier on New Repo Files
-        run: npx prettier --write
+        run: npx prettier --write .
 
       - name: Commit and Push Drift Branch
         run: |
