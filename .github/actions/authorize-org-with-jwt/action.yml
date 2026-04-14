@@ -2,11 +2,11 @@ name: Salesforce Authorize Org with Auth URL
 description: Authorize Salesforce org with Auth URL
 
 inputs:
-  consumer-key:
+  consumer_key:
     description: Consumer key for the External App
     required: true
 
-  jwt-key:
+  jwt_key:
     description: JWT key for the Authorizing to the External App
     required: true
 
@@ -14,15 +14,15 @@ inputs:
     description: Username of the Pipeline User
     required: true
 
-  instance-url:
-    description: Instance-URL of the target org
+  instance_url:
+    description: Instance URL of the target org
     required: true
 
-  target-alias:
+  target_alias:
     description: Alias of the target org
     required: true
 
-  expected-org-id:
+  expected_org_id:
     description: Expected Salesforce Org ID (15 char)
     required: true
 
@@ -34,22 +34,24 @@ runs:
       run: |
 
         JWT_KEY_FILE=$(mktemp) 
-        printf "%s" "${{ inputs.jwt-key }}" > "$JWT_KEY_FILE"
+        printf "%s" "${{ inputs.jwt_key }}" > "$JWT_KEY_FILE"
         trap 'rm -f "$JWT_KEY_FILE"' EXIT
 
+        TARGET_ORG_ALIAS 
+
         sf org login jwt \
-            --client-id "${{ inputs.consumer-key }}" \
+            --client-id "${{ inputs.consumer_key }}" \
             --jwt-key-file "$JWT_KEY_FILE" \
             --username "${{ inputs.username }}" \
-            --instance-url "${{ inputs.instance-url }}" \
-            --alias "${{ inputs.target-alias }}" \
+            --instance-url "${{ inputs.instance_url }}" \
+            --alias "${{ inputs.target_alias }}" \
             --json
 
-        sf org display --target-org "${{ inputs.target-alias }}" --json
+        sf org display --target-org "${{ inputs.target_alias }}" --json
 
-        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target-alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target_alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
         echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
-        EXPECTED_ORG_ID="${{ inputs.expected-org-id }}"
+        EXPECTED_ORG_ID="${{ inputs.expected_org_id }}"
 
         if [ "${ACTUAL_ORG_ID:0:15}" != "${EXPECTED_ORG_ID:0:15}" ]; then
             echo "--- Authentication failed. Exiting script. ---"
