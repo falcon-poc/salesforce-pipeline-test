@@ -37,8 +37,6 @@ runs:
         printf "%s" "${{ inputs.jwt_key }}" > "$JWT_KEY_FILE"
         trap 'rm -f "$JWT_KEY_FILE"' EXIT
 
-        TARGET_ORG_ALIAS 
-
         sf org login jwt \
             --client-id "${{ inputs.consumer_key }}" \
             --jwt-key-file "$JWT_KEY_FILE" \
