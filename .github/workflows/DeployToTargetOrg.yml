@@ -67,23 +67,34 @@ jobs:
 
           echo "✅ LWC tests passed"
 
-      # 5. Authenticate to Target Org
-      - name: Authenticate to Target Org
-        run: |
-          AUTH_FILE=$(mktemp)
-          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-          rm "$AUTH_FILE"          
+      # # 5. Authenticate to Target Org
+      # - name: Authenticate to Target Org
+      #   run: |
+      #     AUTH_FILE=$(mktemp)
+      #     echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
+      #     sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
+      #     rm "$AUTH_FILE"
 
-           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+      #      ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
 
-          echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
-          echo "TARGET_ORG_ID: $TARGET_ORG_ID"
+      #     echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
+      #     echo "TARGET_ORG_ID: $TARGET_ORG_ID"
 
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
+      #     if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
+      #         echo "--- Authentication failed. Exiting script. ---"
+      #         exit 1
+      #     fi
+
+      # 5. Authenticate to Target Org with JWT Flow
+      - name: Authenticate to Target Org with JWT Flow
+        uses: ./.github/actions/authorize-org-with-jwt
+        with:
+          consumer-key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt-key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance-url: ${{ env.TARGET_ORG_INSTANCE_URL }}
+          username: ${{ secrets.TARGET_ORG_USERNAME }}
+          target-alias: ${{ env.TARGET_ORG_ALIAS }}
+          expected-org-id: ${{ secrets.TARGET_ORG_ID }}
 
       # 6. Generate Manifest file
       - name: Generate Manifest file

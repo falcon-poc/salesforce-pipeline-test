@@ -1,0 +1,56 @@
+name: Salesforce Authorize Org with Auth URL
+description: Authorize Salesforce org with Auth URL
+
+inputs:
+  consumer-key:
+    description: Consumer key for the External App
+    required: true
+
+  jwt-key:
+    description: JWT key for the Authorizing to the External App
+    required: true
+
+  username:
+    description: Username of the Pipeline User
+    required: true
+
+  instance-url:
+    description: Instance-URL of the target org
+    required: true
+
+  target-alias:
+    description: Alias of the target org
+    required: true
+
+  expected-org-id:
+    description: Expected Salesforce Org ID (15 char)
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Target Org
+      shell: bash
+      run: |
+
+        JWT_KEY_FILE=$(mktemp) 
+        printf "%s" "${{ inputs.jwt-key }}" > "$JWT_KEY_FILE"
+        trap 'rm -f "$JWT_KEY_FILE"' EXIT
+
+        sf org login jwt \
+            --client-id "${{ inputs.consumer-key }}" \
+            --jwt-key-file "$JWT_KEY_FILE" \
+            --username "${{ inputs.username }}" \
+            --instance-url "${{ inputs.instance-url }}" \
+            --alias "${{ inputs.target-alias }}" \
+            --json
+
+
+        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target-alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+        echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
+        EXPECTED_ORG_ID="${{ inputs.expected-org-id }}"
+
+        if [ "${ACTUAL_ORG_ID:0:15}" != "${EXPECTED_ORG_ID:0:15}" ]; then
+            echo "--- Authentication failed. Exiting script. ---"
+            exit 1
+        fi
