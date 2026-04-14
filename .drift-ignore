@@ -13,8 +13,9 @@ CustomField/*__dll.*
 CustomField/*__dlm.*
 CustomField/*__hd.*
 
-# Namespaced permission sets
+# Namespaced permission sets and groups
 PermissionSet/*__*
+PermissionSetGroup/force__*
 
 # System-generated Apex classes
 ApexClass/ChangePasswordController
