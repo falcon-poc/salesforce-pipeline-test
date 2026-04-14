@@ -91,7 +91,7 @@ jobs:
         with:
           consumer-key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
           jwt-key: ${{ secrets.TARGET_ORG_JWT_KEY }}
-          instance-url: ${{ env.TARGET_ORG_INSTANCE_URL }}
+          instance-url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
           username: ${{ secrets.TARGET_ORG_USERNAME }}
           target-alias: ${{ env.TARGET_ORG_ALIAS }}
           expected-org-id: ${{ secrets.TARGET_ORG_ID }}
