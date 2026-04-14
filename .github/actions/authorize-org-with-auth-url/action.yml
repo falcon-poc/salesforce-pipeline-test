@@ -1,0 +1,43 @@
+name: Salesforce Authorize Org with Auth URL
+description: Authorize Salesforce org with Auth URL
+
+inputs:
+  target-org-auth-url:
+    description: SFDX auth URL for the Org
+    required: true
+
+  target-org-alias:
+    description: Alias for the Org
+    required: true
+
+  expected-org-id:
+    description: Expected Salesforce Org ID (15 char)
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Target Org
+      run: |
+        set -e
+
+        AUTH_FILE=$(mktemp)
+        trap 'rm -f "$AUTH_FILE"' EXIT
+
+        echo "${{ inputs.target-org-auth-url }}" > "$AUTH_FILE"
+        echo "target-org-auth-url: ${{ inputs.target-org-alias }}"
+
+        sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "${{ inputs.target-org-alias }}"
+        rm "$AUTH_FILE"          
+
+        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target-org-alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+        EXPECTED_ORG_ID="${{ inputs.expected-org-id }}"
+
+        if [ "${ACTUAL_ORG_ID:0:15}" != "${EXPECTED_ORG_ID:0:15}" ]; then
+            echo "--- Authentication failed. Exiting script. ---"
+            exit 1
+        fi
+
+          
+
+
