@@ -94,7 +94,7 @@ jobs:
           jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
           instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
           username: ${{ secrets.TARGET_ORG_USERNAME }}
-          target_alias: ${{ env.TARGET_ORG_ALIAS }}
+          target_alias: ${{ env.TARGET_ALIAS }}
           expected_org_id: ${{ secrets.TARGET_ORG_ID }}
 
       # 6. Generate Manifest file
