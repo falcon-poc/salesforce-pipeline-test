@@ -52,6 +52,7 @@ jobs:
       #4. Run LWC tests
       - name: Run LWC tests
         run: |
+          echo "INSTANCE URL: ${{ secrets.TARGET_ORG_INSTANCE_URL }}"
           npm ci
 
           set -o pipefail
