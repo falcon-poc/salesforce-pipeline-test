@@ -46,7 +46,7 @@ runs:
             --json
 
 
-        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target-alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
+        ACTUAL_ORG_ID=$(sf org display --target-org "${{ inputs.target-alias }}" --json | node -pe "JSON.parse(fs.readFileSync(0))")
         echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
         EXPECTED_ORG_ID="${{ inputs.expected-org-id }}"
 
