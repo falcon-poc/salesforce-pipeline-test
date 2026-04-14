@@ -7,8 +7,8 @@ on:
       - staging
       - prod
       - dev
-    paths:
-      - "force-app/**"
+    # paths:
+    #   - "force-app/**"
 
 run-name: Deploy to target org - ${{ github.ref_name }}
 
@@ -90,12 +90,12 @@ jobs:
       - name: Authenticate to Target Org with JWT Flow
         uses: ./.github/actions/authorize-org-with-jwt
         with:
-          consumer-key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
-          jwt-key: ${{ secrets.TARGET_ORG_JWT_KEY }}
-          instance-url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
+          consumer_key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
           username: ${{ secrets.TARGET_ORG_USERNAME }}
-          target-alias: ${{ env.TARGET_ORG_ALIAS }}
-          expected-org-id: ${{ secrets.TARGET_ORG_ID }}
+          target_alias: ${{ env.TARGET_ORG_ALIAS }}
+          expected_org_id: ${{ secrets.TARGET_ORG_ID }}
 
       # 6. Generate Manifest file
       - name: Generate Manifest file
