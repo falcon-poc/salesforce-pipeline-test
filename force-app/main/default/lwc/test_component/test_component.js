@@ -2,6 +2,6 @@ import { LightningElement } from "lwc";
 
 export default class Test_component extends LightningElement {
   testMethod = () => {
-    const vari = "new test";
+    const vari = "newer test";
   };
 }
