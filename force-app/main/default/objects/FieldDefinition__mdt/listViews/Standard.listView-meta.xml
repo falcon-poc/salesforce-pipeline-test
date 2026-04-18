@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Standard</fullName>
+    <columns>MasterLabel</columns>
+    <columns>APIName__c</columns>
+    <columns>DataType__c</columns>
+    <columns>DefaultLabel__c</columns>
+    <columns>RegionalsKey__c</columns>
+    <columns>RelatedObject__c</columns>
+    <columns>RelatedPicklist__c</columns>
+    <columns>TargetObject__c</columns>
+    <columns>TargetField__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>Standard</label>
+</ListView>
