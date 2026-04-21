@@ -27,7 +27,7 @@ jobs:
       REPO_DIR: "force-app"
       ORG_PACKAGE_XML: "tmp-drift/org/package.xml"
       IGNORE_FILE: ".drift-ignore"
-      BASE_BRANCH: "dev"
+      BASE_BRANCH: ${{ matrix.environment }}
       DRIFT_BRANCH: ""
       TMP_DIR: "tmp-drift"
 
@@ -35,7 +35,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: dev
+          ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
 
       - name: Use Node.js
