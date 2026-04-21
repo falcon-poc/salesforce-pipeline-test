@@ -279,6 +279,7 @@ jobs:
               --base "$BASE_BRANCH" \
               --head "$DRIFT_BRANCH" \
               --title "Drift Reconciliation $(date +%Y-%m-%d)" \
+              --fill
 
           echo "PR Created for branch $DRIFT_BRANCH to $BASE_BRANCH"
 
