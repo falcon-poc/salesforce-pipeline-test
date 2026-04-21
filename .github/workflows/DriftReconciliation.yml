@@ -242,9 +242,6 @@ jobs:
       - name: Run Prettier on New Repo Files
         run: npx prettier --write .
 
-      - name: Set DRIFT_BRANCH
-        run: echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
-
       - name: Commit and Push Drift Branch if Drift Detected
         id: detect_drift_step
         run: |
@@ -258,9 +255,9 @@ jobs:
               exit 0
           fi
 
-          git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"
+          echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
-          file_summary=$(git diff --cached --stat)
+          git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"   
 
           git commit -m "drift: reconciliation $(date +%Y-%m-%d)"
 
@@ -274,24 +271,12 @@ jobs:
               echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
               echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
               exit 1
-          fi
-
-          pr_body="## Drift Report
-
-              Automated drift detection between the Salesforce org and this repository.
-
-              ### Summary
-              \`\`\`
-              ${file_summary}
-              \`\`\`
-
-              Review the file changes in this PR to see exactly what has drifted."
+          fi          
 
           gh pr create \
               --base "$BASE_BRANCH" \
               --head "$DRIFT_BRANCH" \
               --title "Drift Reconciliation $(date +%Y-%m-%d)" \
-              --body "$pr_body"
 
           echo "PR Created for branch $DRIFT_BRANCH to $BASE_BRANCH"
 
