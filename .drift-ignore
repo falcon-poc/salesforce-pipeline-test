@@ -52,6 +52,13 @@ CustomField/Opportunity.Budget_Confirmed__c
 CustomField/Opportunity.Discovery_Completed__c
 CustomField/Opportunity.Loss_Reason__c
 CustomField/Opportunity.ROI_Analysis_Completed__c
+CustomField/In_App_Checklist_Settings__c.ProfileKey__c
+CustomField/In_App_Checklist_Settings__c.Sales_Cloud_In_App_Page__c
+CustomField/Invoice_Data__c.Field_1__c
+
+# Specific custom objects we don't own
+CustomObject/In_App_Checklist_Settings__c
+CustomObject/Invoice_Data__c
 
 # Specific permission sets we don't own
 PermissionSet/Program_Config_Admin
