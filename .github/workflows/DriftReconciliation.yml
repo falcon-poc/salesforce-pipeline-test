@@ -242,6 +242,10 @@ jobs:
       - name: Run Prettier on New Repo Files
         run: npx prettier --write .
 
+      - name: Set Drift Branch name
+        run: |
+          echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+
       - name: Commit and Push Drift Branch if Drift Detected
         id: detect_drift_step
         run: |
@@ -254,8 +258,6 @@ jobs:
               echo "should_create_pr=false" >> $GITHUB_OUTPUT
               exit 0
           fi
-
-          echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
           git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"   
 
