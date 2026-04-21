@@ -245,12 +245,16 @@ jobs:
       - name: Set DRIFT_BRANCH
         run: echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
-      - name: Commit and Push Drift Branch
+      - name: Commit and Push Drift Branch if Drift Detected
+        id: detect_drift_step
         run: |
           git add -A "$REPO_DIR/"
 
+          echo "should_create_pr=true" >> $GITHUB_OUTPUT
+
           if git diff --cached --quiet; then
               echo "No drift detected."
+              echo "should_create_pr=false" >> $GITHUB_OUTPUT
               exit 0
           fi
 
@@ -262,13 +266,14 @@ jobs:
 
           git push -u origin "$DRIFT_BRANCH" --force
 
-      - name: Create Drift Branch PR
+      - name: Create Drift Branch PR if Drift Detected
+        if: steps.detect_drift_step.outputs.should_create_pr == 'true'
         run: |
 
           if ! gh auth status &>/dev/null; then
               echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
               echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
-              exit 0
+              exit 1
           fi
 
           pr_body="## Drift Report
@@ -287,6 +292,8 @@ jobs:
               --head "$DRIFT_BRANCH" \
               --title "Drift Reconciliation $(date +%Y-%m-%d)" \
               --body "$pr_body"
+
+          echo "PR Created for branch $DRIFT_BRANCH to $BASE_BRANCH"
 
       - name: Cleanup
         if: always()
