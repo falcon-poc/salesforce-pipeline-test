@@ -55,9 +55,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Set DRIFT_BRANCH
-        run: echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
-
       - name: Create Temp Directory
         run: mkdir -p "$TMP_DIR" "$TMP_DIR/repo" "$TMP_DIR/org"
 
@@ -230,8 +227,6 @@ jobs:
             --output-dir "$TMP_DIR/org" \
             --ignore-conflicts
 
-      - name: Create Drift Branch
-        run: git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"
 
       - name: Replace Branch Metadata with Retrieved Org Contents
         run: |
@@ -247,6 +242,9 @@ jobs:
       - name: Run Prettier on New Repo Files
         run: npx prettier --write .
 
+      - name: Set DRIFT_BRANCH
+        run: echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+
       - name: Commit and Push Drift Branch
         run: |
           git add -A "$REPO_DIR/"
@@ -255,6 +253,8 @@ jobs:
               echo "No drift detected."
               exit 0
           fi
+
+          git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"
 
           file_summary=$(git diff --cached --stat)
 
