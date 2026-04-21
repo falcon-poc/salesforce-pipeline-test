@@ -88,25 +88,25 @@ jobs:
           sf project generate manifest \
             --from-org "$TARGET_ALIAS" \
             --metadata "ApexClass" \
-            --metadata "CustomObject" \
-            --metadata "CustomField" \
-            --metadata "LightningComponentBundle" \
-            --metadata "PermissionSet" \
-            --metadata "PermissionSetGroup" \
-            --metadata "FlexiPage" \
-            --metadata "Layout" \
-            --metadata "CompactLayout" \
-            --metadata "Flow" \
-            --metadata "FlowDefinition" \
-            --metadata "Workflow" \
-            --metadata "ApprovalProcess" \
-            --metadata "NavigationMenu" \
-            --metadata "RecordType" \
-            --metadata "ValidationRule" \
-            --metadata "RecordType" \
-            --metadata "CustomLabel" \
-            --metadata "StandardValueSet" \
-            --metadata "GlobalValueSet" \
+            # --metadata "CustomObject" \
+            # --metadata "CustomField" \
+            # --metadata "LightningComponentBundle" \
+            # --metadata "PermissionSet" \
+            # --metadata "PermissionSetGroup" \
+            # --metadata "FlexiPage" \
+            # --metadata "Layout" \
+            # --metadata "CompactLayout" \
+            # --metadata "Flow" \
+            # --metadata "FlowDefinition" \
+            # --metadata "Workflow" \
+            # --metadata "ApprovalProcess" \
+            # --metadata "NavigationMenu" \
+            # --metadata "RecordType" \
+            # --metadata "ValidationRule" \
+            # --metadata "RecordType" \
+            # --metadata "CustomLabel" \
+            # --metadata "StandardValueSet" \
+            # --metadata "GlobalValueSet" \
             --output-dir "$TMP_DIR/org"
 
       - name: Filter Target Org Manifest
