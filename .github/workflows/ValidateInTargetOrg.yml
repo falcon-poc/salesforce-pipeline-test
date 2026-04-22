@@ -51,7 +51,7 @@ jobs:
 
       - name: Validate formatting
         run: |
-          npm run prettier --check 
+          npx prettier --check 
 
       #4. Run LWC tests
       - name: Run LWC tests
