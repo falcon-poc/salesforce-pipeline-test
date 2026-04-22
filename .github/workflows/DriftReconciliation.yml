@@ -238,6 +238,7 @@ jobs:
           rsync -av --delete \
             --exclude='**/__tests__/**' \
             --exclude='**/__mocks__/**' \
+            --exclude='**/package.xml' \
             "$SRC_PATH" "$DEST_ABSOLUTE_PATH"
 
       - name: Run Prettier on New Repo Files
