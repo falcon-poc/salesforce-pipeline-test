@@ -110,7 +110,7 @@ jobs:
             --metadata "OauthCustomScope" \
             --output-dir "$TMP_DIR/org"
 
-      - name: Filter Target Org Manifest
+      - name: Filter Org-Owned Metadata from the Target Org Manifest
         run: |
           manifest="$ORG_PACKAGE_XML"
           tmpfile="${manifest}.tmp"
@@ -226,7 +226,6 @@ jobs:
             --manifest "$ORG_PACKAGE_XML" \
             --output-dir "$TMP_DIR/org" \
             --ignore-conflicts
-
 
       - name: Replace Branch Metadata with Retrieved Org Contents
         run: |

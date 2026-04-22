@@ -1,5 +1,5 @@
-import { LightningElement } from 'lwc';
+import { LightningElement } from "lwc";
 
 export default class NewTestComponent extends LightningElement {
-    doSomething = jest.fn();
+  doSomething = jest.fn();
 }

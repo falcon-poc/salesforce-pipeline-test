@@ -71,14 +71,14 @@ jobs:
         run: |
           echo "PWD:"
           pwd
-          
+
           echo "FILES (git tracked):"
           git ls-files | wc -l
-          
+
           echo "FILES (matching pattern):"
           git ls-files "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}" | wc -l
           npm run prettier:verify
-      
+
       # 5. Authenticate to Target Org
       - name: Authenticate to Target Org
         run: |
