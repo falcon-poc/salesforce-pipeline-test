@@ -233,7 +233,10 @@ jobs:
           DEST_ABSOLUTE_PATH=$(pwd)/"$REPO_DIR/main/default"
           SRC_PATH="$TMP_DIR/org/"
 
-          rsync -av --delete \           
+          echo "SRC_PATH: [$SRC_PATH]"
+          echo "DEST_PATH: [$DEST_ABSOLUTE_PATH]"
+
+          rsync -av --delete \
             --exclude='**/__tests__/**' \
             --exclude='**/__mocks__/**' \
             "$SRC_PATH" "$DEST_ABSOLUTE_PATH"
