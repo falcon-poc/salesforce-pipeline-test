@@ -49,10 +49,6 @@ jobs:
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
-      - name: Validate formatting
-        run: |
-          npx prettier --check 
-
       #4. Run LWC tests
       - name: Run LWC tests
         run: |
@@ -71,6 +67,10 @@ jobs:
 
           echo "✅ LWC tests passed"
 
+      - name: Validate formatting
+        run: |
+          npx prettier --check 
+      
       # 5. Authenticate to Target Org
       - name: Authenticate to Target Org
         run: |
