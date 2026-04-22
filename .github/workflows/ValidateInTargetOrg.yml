@@ -69,7 +69,7 @@ jobs:
 
       - name: Validate formatting
         run: |
-          npx prettier --check 
+          npm run prettier:verify
       
       # 5. Authenticate to Target Org
       - name: Authenticate to Target Org
