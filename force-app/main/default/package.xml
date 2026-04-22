@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>aaaTestClass</members>
+        <members>aaaTestClass_Test</members>
+        <members>aaaaaaa</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>Account.Account_Compact_Layout</members>
+        <members>Harmony_Navigation_Items__c.Custom_Compact_Layout</members>
+        <members>Harmony_Projects__c.Custom_Compact_Layout</members>
+        <members>Harmony_Quotes__c.Custom_Compact_Layout</members>
+        <members>Invoice_Data__c.Custom_Compact_Layout</members>
+        <members>Lead.Leads_Custom_Compact_Layout</members>
+        <members>Opportunity.New_Awesome_Companct_Layout</members>
+        <members>User.User_Layout</members>
+        <name>CompactLayout</name>
+    </types>
+    <types>
+        <members>FieldConfig__c.Column__c</members>
+        <members>FieldConfig__c.DefaultValue__c</members>
+        <members>FieldConfig__c.DisplayLabel__c</members>
+        <members>FieldConfig__c.DisplayOrder__c</members>
+        <members>FieldConfig__c.FieldAPIName__c</members>
+        <members>FieldConfig__c.HelpText__c</members>
+        <members>FieldConfig__c.IsMandatoryValue__c</members>
+        <members>FieldConfig__c.IsReadOnly__c</members>
+        <members>FieldConfig__c.IsRequired__c</members>
+        <members>FieldConfig__c.Placeholder__c</members>
+        <members>FieldConfig__c.ProgramVersion__c</members>
+        <members>FieldConfig__c.Section__c</members>
+        <members>FieldConfig__c.ValidationRuleKey__c</members>
+        <members>FieldConfig__c.VisibilityRuleKey__c</members>
+        <members>FieldDefinition__mdt.APIName__c</members>
+        <members>FieldDefinition__mdt.DataType__c</members>
+        <members>FieldDefinition__mdt.DefaultLabel__c</members>
+        <members>FieldDefinition__mdt.RegionalsKey__c</members>
+        <members>FieldDefinition__mdt.RelatedObject__c</members>
+        <members>FieldDefinition__mdt.RelatedPicklist__c</members>
+        <members>FieldDefinition__mdt.TargetField__c</members>
+        <members>FieldDefinition__mdt.TargetObject__c</members>
+        <members>FieldProjection__c.Column__c</members>
+        <members>FieldProjection__c.Default_Value__c</members>
+        <members>FieldProjection__c.Display_Label__c</members>
+        <members>FieldProjection__c.Display_Order__c</members>
+        <members>FieldProjection__c.FieldAPIName__c</members>
+        <members>FieldProjection__c.HelpText__c</members>
+        <members>FieldProjection__c.IsReadOnly__c</members>
+        <members>FieldProjection__c.Is_Required__c</members>
+        <members>FieldProjection__c.Is_Visible__c</members>
+        <members>FieldProjection__c.LineItemDefinition__c</members>
+        <members>FieldProjection__c.Placeholder__c</members>
+        <members>FieldProjection__c.ProgramVersion__c</members>
+        <members>FieldProjection__c.Program__c</members>
+        <members>FieldProjection__c.Scope__c</members>
+        <members>FieldProjection__c.Section__c</members>
+        <members>FieldProjection__c.ValueType__c</members>
+        <members>Harmony_Navigation_Items__c.Doing_the_Work__c</members>
+        <members>Harmony_Navigation_Items__c.Invoicing_the_Client__c</members>
+        <members>Harmony_Navigation_Items__c.Selling_the_Work__c</members>
+        <members>Harmony_Quotes__c.Field_1__c</members>
+        <members>LineItemDefinition__c.ProgramVersion__c</members>
+        <members>LineItemDefinition__c.StandardVersion__c</members>
+        <members>LineItemFieldConfig__c.FieldAPIName__c</members>
+        <members>LineItemFieldConfig__c.LineItemDefinition__c</members>
+        <members>ProgramStandard__c.ProgramVersion__c</members>
+        <members>ProgramStandard__c.StandardVersion__c</members>
+        <members>ProgramVersion__c.Parent_Version__c</members>
+        <members>ProgramVersion__c.Program__c</members>
+        <members>ProgramVersion__c.Published_By__c</members>
+        <members>ProgramVersion__c.Published_Date__c</members>
+        <members>ProgramVersion__c.Status__c</members>
+        <members>ProgramVersion__c.Version_Number__c</members>
+        <members>Program__c.Description__c</members>
+        <members>Program__c.DisplayLabel__c</members>
+        <members>Program__c.RegionId__c</members>
+        <members>Program__c.ServiceGroupId__c</members>
+        <members>StandardField__c.FieldAPIName__c</members>
+        <members>StandardField__c.StandardVersion__c</members>
+        <members>StandardVersion__c.Parent_Version__c</members>
+        <members>StandardVersion__c.Published_By__c</members>
+        <members>StandardVersion__c.Published_Date__c</members>
+        <members>StandardVersion__c.Standard__c</members>
+        <members>StandardVersion__c.Status__c</members>
+        <members>StandardVersion__c.Version_Number__c</members>
+        <members>Standard__c.Description__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>aaa_Test_Custom_Label</members>
+        <members>bbbbb_Test_Label</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
+        <members>FieldConfig__c</members>
+        <members>FieldDefinition__mdt</members>
+        <members>FieldProjection__c</members>
+        <members>Harmony_Navigation_Items__c</members>
+        <members>Harmony_Projects__c</members>
+        <members>Harmony_Quotes__c</members>
+        <members>LineItemDefinition__c</members>
+        <members>LineItemFieldConfig__c</members>
+        <members>ProgramStandard__c</members>
+        <members>ProgramVersion__c</members>
+        <members>Program__c</members>
+        <members>StandardField__c</members>
+        <members>StandardVersion__c</members>
+        <members>Standard__c</members>
+        <members>Test_Metadata__mdt</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>Falcon_Deploy_Test</members>
+        <name>ExternalClientApplication</name>
+    </types>
+    <types>
+        <members>Falcon_Deploy_Test_oauthPlcy</members>
+        <name>ExtlClntAppOauthConfigurablePolicies</name>
+    </types>
+    <types>
+        <members>Falcon_Deploy_Test_oauth</members>
+        <name>ExtlClntAppOauthSettings</name>
+    </types>
+    <types>
+        <members>Account_Record_Page_Three_Column</members>
+        <members>Contact_Record_Page_Three_Column</members>
+        <members>DataGovernanceConsole_UtilityBar</members>
+        <members>EasyConsole_UtilityBar</members>
+        <members>ExpressionSetConsole_UtilityBar</members>
+        <members>FlowsApp_UtilityBar</members>
+        <members>Getting_Started_Home</members>
+        <members>HVSConsole_UtilityBar</members>
+        <members>Harmony_System_UtilityBar</members>
+        <members>Integration_UtilityBar</members>
+        <members>Lead_Generation_UtilityBar</members>
+        <members>Lead_Record_Page_Three_Column</members>
+        <members>LightningBolt_UtilityBar</members>
+        <members>LightningSalesConsole_UtilityBar</members>
+        <members>LightningSales_UtilityBar</members>
+        <members>Opportunity_Record_Page_Three_Column</members>
+        <members>RatingManagement_UtilityBar</members>
+        <members>Relationship_Management_UtilityBar</members>
+        <members>SalesCloudMobile_UtilityBar</members>
+        <members>Sales_Leadership_UtilityBar</members>
+        <members>Sales_Operations_UtilityBar</members>
+        <members>Sales_UtilityBar</members>
+        <members>SalesforceContracts_UtilityBar</members>
+        <name>FlexiPage</name>
+    </types>
+    <types>
+        <members>Polite_Create_a_Case</members>
+        <name>Flow</name>
+    </types>
+    <types>
+        <members>Polite_Create_a_Case</members>
+        <name>FlowDefinition</name>
+    </types>
+    <types>
+        <members>Account-Account Layout</members>
+        <members>AccountBrand-Account Brand Layout</members>
+        <members
+    >AccountContactRelation-Account Contact Relationship Layout</members>
+        <members>AccountRelationship-Account RelationshipLayout</members>
+        <members>ActionPlan-Action Plan Layout</members>
+        <members
+    >ActionPlanItemDependency-Action Plan Item Dependency Layout</members>
+        <members>ActionPlanTemplate-Action Plan Template Layout</members>
+        <members
+    >ActionPlanTemplateItem-Action Plan Template Item Layout</members>
+        <members
+    >ActionPlanTemplateItemValue-Action Plan Template Item Value Layout</members>
+        <members
+    >ActionPlanTemplateVersion-Action Plan Template Version Layout</members>
+        <members
+    >ActionPlnTmplItmDependency-Action Plan Template Item Dependency Layout</members>
+        <members
+    >AlternativePaymentMethod-Alternative Payment Method Layout</members>
+        <members
+    >ApprovalAlertContentDef-%5F%5FMISSING LABEL%5F%5F PropertyFile - val ApprovalAlertContentDef not found in section StandardLayouts</members>
+        <members>Asset-Asset Layout</members>
+        <members>AssetRelationship-Asset Relationship Layout</members>
+        <members>AttributeDefinition-Attribute Definition Layout</members>
+        <members
+    >CalcMatrixColumnRange-Decision Matrix Column Range Layout</members>
+        <members
+    >CalcProcStepRelationship-Expression Set Step Relationship Layout</members>
+        <members>CalculationMatrix-Decision Matrix Layout</members>
+        <members>CalculationMatrixColumn-Decision Matrix Column Layout</members>
+        <members>CalculationMatrixRow-Decision Matrix Row Layout</members>
+        <members
+    >CalculationMatrixVersion-Decision Matrix Version Layout</members>
+        <members>CalculationProcedure-Calculation Procedure Layout</members>
+        <members
+    >CalculationProcedureStep-Calculation Procedure Step Layout</members>
+        <members
+    >CalculationProcedureVariable-Calculation Procedure Variable Layout</members>
+        <members
+    >CalculationProcedureVersion-Calculation Procedure Version Layout</members>
+        <members>Campaign-Campaign Layout</members>
+        <members
+    >CampaignInfluenceModel-Campaign Influence Model Layout</members>
+        <members>CampaignMember-Campaign Member Page Layout</members>
+        <members>CardPaymentMethod-Card Payment Method Layout</members>
+        <members>Case-Case Layout</members>
+        <members>CaseClose-Close Case Layout</members>
+        <members>CaseInteraction-Case Feed Layout</members>
+        <members>CollaborationGroup-Group Layout</members>
+        <members>Contact-Contact Layout</members>
+        <members>ContentLink-Content Link Layout</members>
+        <members>ContentSource-Content Source Layout</members>
+        <members>ContentVersion-Content Version</members>
+        <members>Contract-Contract Layout</members>
+        <members>CreditMemo-Credit Memo Layout</members>
+        <members>CreditMemoLine-Credit Memo Line Layout</members>
+        <members>DigitalWallet-Digital Wallet Layout</members>
+        <members>DuplicateRecordSet-Duplicate Record Set Layout</members>
+        <members>EmailMessage-Email Message Layout</members>
+        <members>EngagementInteraction-Engagement Interaction Layout</members>
+        <members>EngagementTopic-Engagement Topic Layout</members>
+        <members>Event-Event Layout</members>
+        <members>ExpressionSet-Expression Set Layout</members>
+        <members>ExpressionSetVersion-Expression Set Version Layout</members>
+        <members
+    >ExternalAccountHierarchy-External Account Hierarchy Layout</members>
+        <members>FeedItem-Feed Item Layout</members>
+        <members>FieldConfig__c-Field Config Layout</members>
+        <members>FieldDefinition__mdt-Field Definition Layout</members>
+        <members>FieldProjection__c-Field Projection Layout</members>
+        <members>FlowOrchestration-Orchestration Layout</members>
+        <members>FulfillmentOrder-Fulfillment Order Layout</members>
+        <members
+    >FulfillmentOrderItemAdjustment-Fulfillment Order Item Adjustment Layout</members>
+        <members
+    >FulfillmentOrderItemTax-Fulfillment Order Item Tax Layout</members>
+        <members
+    >FulfillmentOrderLineItem-Fulfillment Order Product Layout</members>
+        <members>Global-Global Layout</members>
+        <members
+    >Harmony_Navigation_Items__c-Harmony Navigation Item Layout</members>
+        <members>Harmony_Projects__c-Project Layout</members>
+        <members>Harmony_Quotes__c-Harmony Quote Layout</members>
+        <members>Idea-Idea Layout</members>
+        <members>Invoice-Invoice Layout</members>
+        <members>InvoiceLine-Invoice Line Layout</members>
+        <members>Invoice_Data__c-Invoice Data Layout</members>
+        <members>Lead-Lead Layout</members>
+        <members>LegalEntity-Legal Entity Layout</members>
+        <members>LineItemDefinition__c-Line Item Definition Layout</members>
+        <members>LineItemFieldConfig__c-Line Item Field Config Layout</members>
+        <members>Macro-Macro Layout</members>
+        <members>ObjectStateDefinition-Object State Definition Layout</members>
+        <members>Opportunity-Opportunity Layout</members>
+        <members>OpportunityLineItem-Opportunity Product Layout</members>
+        <members>Order-Order Layout</members>
+        <members>OrderItem-Order Product Layout</members>
+        <members>Payment-Payment Layout</members>
+        <members
+    >PaymentAuthAdjustment-Payment Authorization Adjustment Layout</members>
+        <members>PaymentAuthorization-Payment Authorization Layout</members>
+        <members>PaymentGateway-Payment Gateway Layout</members>
+        <members>PaymentGatewayLog-Payment Gateway Log Layout</members>
+        <members>PaymentGroup-Payment Group Layout</members>
+        <members>PaymentLineInvoice-Payment Line Invoice Layout</members>
+        <members>Pricebook2-Price Book Layout</members>
+        <members>PricebookEntry-Price Book Entry Layout</members>
+        <members>ProcessException-Process Exception Layout</members>
+        <members>Product2-Product Layout</members>
+        <members>ProductSellingModel-Product Selling Model Layout</members>
+        <members>ProfileSkill-Skill Layout</members>
+        <members>ProfileSkillEndorsement-Endorsement Layout</members>
+        <members>ProfileSkillUser-Skill User Layout</members>
+        <members>ProgramStandard__c-Program Standard Layout</members>
+        <members>ProgramVersion__c-Program Version Layout</members>
+        <members>Program__c-Program Layout</members>
+        <members>QuickText-Quick Text Layout</members>
+        <members>Quote-Quote Layout</members>
+        <members>QuoteLineItem-Quote Line Item Layout</members>
+        <members>Refund-Refund Layout</members>
+        <members>RefundLinePayment-Refund Line Payment Layout</members>
+        <members
+    >RevenueTransactionErrorLog-Revenue Transaction Error Log Layout</members>
+        <members>RuleLibrary-Rule Library Layout</members>
+        <members>RuleLibraryVersion-Rule Library Version Layout</members>
+        <members>SalesforceContract-Salesforce Contract Layout</members>
+        <members>SalesforceInvoice-Salesforce Invoice Layout</members>
+        <members>SalesforcePayment-Salesforce Payment Layout</members>
+        <members>Scorecard-Scorecard Layout</members>
+        <members>ScorecardAssociation-Scorecard Association Layout</members>
+        <members>ScorecardMetric-Scorecard Metric Layout</members>
+        <members>Solution-Solution Layout</members>
+        <members>StandardField__c-Standard Field Layout</members>
+        <members>StandardVersion__c-Standard Version Layout</members>
+        <members>Standard__c-Standard Layout</members>
+        <members>Task-Task Layout</members>
+        <members>Test_Metadata__mdt-Test Metadata Layout</members>
+        <members>User-User Layout</members>
+        <members>UserAlt-User Profile Layout</members>
+        <members>UserAppMenuItem-Application Layout</members>
+        <members>UserProvAccount-User Provisioning Account Layout</members>
+        <members>UserProvisioningLog-User Provisioning Log Layout</members>
+        <members
+    >UserProvisioningRequest-User Provisioning Request Layout</members>
+        <members>WorkAccess-Access Layout</members>
+        <members>WorkBadge-Badge Layout</members>
+        <members>WorkBadge-Badge Received Layout 192</members>
+        <members>WorkBadgeDefinition-Badge Definition Layout</members>
+        <members>WorkBadgeDefinition-Badge Layout 192</members>
+        <members>WorkOrder-Work Order Layout</members>
+        <members>WorkOrderLineItem-Work Order Line Item Layout</members>
+        <members>WorkThanks-Thanks Layout</members>
+        <members
+    >cdpactvstrgptnr__ActivationPlatformCredential__mdt-ActivationPlatformCredential Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>newTestComponent</members>
+        <members>testComponent</members>
+        <members>test_component</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>Quick_Items_Homepage</members>
+        <members>SFDC_Default_Navigation_Falcon_Client_Portal</members>
+        <members>SFDC_Default_Navigation_Falcon_Test_2</members>
+        <members>SFDC_Default_Navigation_Falcon_Test_3</members>
+        <name>NavigationMenu</name>
+    </types>
+    <types>
+        <members>falcon_deploy</members>
+        <name>OauthCustomScope</name>
+    </types>
+    <types>
+        <members>aaaa_permissionSet</members>
+        <name>PermissionSet</name>
+    </types>
+    <types>
+        <name>PermissionSetGroup</name>
+    </types>
+    <types>
+        <members>AccountContactMultiRoles</members>
+        <members>AccountContactRole</members>
+        <members>AccountOwnership</members>
+        <members>AccountRating</members>
+        <members>AccountType</members>
+        <members>AssetStatus</members>
+        <members>CampaignMemberStatus</members>
+        <members>CampaignStatus</members>
+        <members>CampaignType</members>
+        <members>CaseContactRole</members>
+        <members>CaseOrigin</members>
+        <members>CasePriority</members>
+        <members>CaseReason</members>
+        <members>CaseStatus</members>
+        <members>CaseType</members>
+        <members>ContactRole</members>
+        <members>ContractContactRole</members>
+        <members>ContractStatus</members>
+        <members>EventSubject</members>
+        <members>EventType</members>
+        <members>FiscalYearPeriodPrefix</members>
+        <members>FiscalYearQuarterName</members>
+        <members>FiscalYearQuarterPrefix</members>
+        <members>FulfillmentStatus</members>
+        <members>FulfillmentType</members>
+        <members>Industry</members>
+        <members>LeadSource</members>
+        <members>LeadStatus</members>
+        <members>OpportunityStage</members>
+        <members>OpportunityType</members>
+        <members>OrderStatus</members>
+        <members>PartnerRole</members>
+        <members>ProcessExceptionCategory</members>
+        <members>ProcessExceptionPriority</members>
+        <members>ProcessExceptionSeverity</members>
+        <members>ProcessExceptionStatus</members>
+        <members>Product2Family</members>
+        <members>QuantityUnitOfMeasure</members>
+        <members>QuickTextCategory</members>
+        <members>QuickTextChannel</members>
+        <members>QuoteStatus</members>
+        <members>Salutation</members>
+        <members>SocialPostClassification</members>
+        <members>SocialPostEngagementLevel</members>
+        <members>SolutionStatus</members>
+        <members>TaskPriority</members>
+        <members>TaskStatus</members>
+        <members>TaskSubject</members>
+        <members>TaskType</members>
+        <members>WorkOrderLineItemStatus</members>
+        <members>WorkOrderPriority</members>
+        <members>WorkOrderStatus</members>
+        <name>StandardValueSet</name>
+    </types>
+    <types>
+        <members>Account.Dont_make_bad_accounts</members>
+        <name>ValidationRule</name>
+    </types>
+    <version>66.0</version>
+</Package>
