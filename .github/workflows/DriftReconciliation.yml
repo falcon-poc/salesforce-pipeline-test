@@ -110,7 +110,7 @@ jobs:
             --metadata "OauthCustomScope" \
             --output-dir "$TMP_DIR/org"
 
-      - name: Filter Target Org Manifest
+      - name: Filter Org-Owned Metadata from the Target Org Manifest
         run: |
           manifest="$ORG_PACKAGE_XML"
           tmpfile="${manifest}.tmp"
@@ -227,7 +227,6 @@ jobs:
             --output-dir "$TMP_DIR/org" \
             --ignore-conflicts
 
-
       - name: Replace Branch Metadata with Retrieved Org Contents
         run: |
           DEST_ABSOLUTE_PATH=$(pwd)/"$REPO_DIR/main/default"
@@ -239,6 +238,7 @@ jobs:
           rsync -av --delete \
             --exclude='**/__tests__/**' \
             --exclude='**/__mocks__/**' \
+            --exclude='**/package.xml' \
             "$SRC_PATH" "$DEST_ABSOLUTE_PATH"
 
       - name: Run Prettier on New Repo Files
