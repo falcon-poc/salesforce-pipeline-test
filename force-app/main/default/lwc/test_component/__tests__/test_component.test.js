@@ -1,7 +1,7 @@
 import { createElement } from "lwc";
-import TestComponent from "c/testComponent";
+import Test_component from "c/test_component";
 
-describe("c-test-component", () => {
+describe("c-test_component", () => {
   afterEach(() => {
     // The jsdom instance is shared across test cases in a single file so reset the DOM
     while (document.body.firstChild) {
@@ -9,7 +9,7 @@ describe("c-test-component", () => {
     }
   });
 
-  // it('Test Component shall intentionally fail', () => {
-  //     expect(1).toEqual(2, 'This component shall intentionally fail. Here is the message output: testComponent');
+  // it('Test_component shall intentionally fail', () => {
+  //     expect(1).toEqual(2, 'This component shall intentionally fail. Here is the message output: test_component');
   // });
 });
