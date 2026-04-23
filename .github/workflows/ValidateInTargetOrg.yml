@@ -48,11 +48,14 @@ jobs:
           echo "Validating PR merge from source branch: ${{ github.event.pull_request.head.ref }} to target branch: ${{ github.event.pull_request.base.ref }}"
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
-
+          
+      - name: Run npm Install
+        run: |
+          npm ci
+      
       #4. Run LWC tests
       - name: Run LWC tests
         run: |
-          npm ci
 
           set -o pipefail
           npx lwc-jest -- --passWithNoTests 2>&1
@@ -69,15 +72,7 @@ jobs:
 
       - name: Validate formatting
         run: |
-          echo "PWD:"
-          pwd
-
-          echo "FILES (git tracked):"
-          git ls-files | wc -l
-
-          echo "FILES (matching pattern):"
-          git ls-files "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}" | wc -l
-          npm run prettier:verify
+          npm run prettier:check
 
       # 5. Authenticate to Target Org
       - name: Authenticate to Target Org
