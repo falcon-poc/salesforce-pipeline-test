@@ -114,6 +114,8 @@ jobs:
             --wait "$DEPLOY_WAIT" \
             --json || true)
 
+
+
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
               j.result?.status || 'Unknown';
@@ -121,13 +123,22 @@ jobs:
 
           if [[ $STATUS != "Succeeded" ]]; then
               echo "❌ Deployment failed! Status: $STATUS"
-              echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
+              echo "See artifact for full output"
+              echo "$DEPLOY_JSON" > deploy-result.json
               exit 1
           fi
 
           echo "✅ Deployment Status: $STATUS"
 
           echo "🎉 Deployment pipeline completed successfully!"
+
+      - name: Creating The Deploy Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-debug
+          path: |
+            deploy-result.json
 
       # 8. Cleanup
       - name: Cleanup
