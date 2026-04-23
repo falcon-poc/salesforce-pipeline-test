@@ -112,7 +112,7 @@ jobs:
             --target-org "$TARGET_ALIAS" \
             --test-level RunLocalTests \
             --wait "$DEPLOY_WAIT" \
-            --json || true)
+           || true)
 
 
 
