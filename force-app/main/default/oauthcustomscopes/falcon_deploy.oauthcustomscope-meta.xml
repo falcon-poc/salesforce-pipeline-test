@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<OauthCustomScope xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>falcon_deploy</description>
-    <developerName>falcon_deploy</developerName>
-    <isProtected>false</isProtected>
-    <isPublic>true</isPublic>
-    <masterLabel>falcon_deploy</masterLabel>
-</OauthCustomScope>
