@@ -84,7 +84,6 @@ jobs:
         run: |
           sf project generate manifest \
             --from-org "$TARGET_ALIAS" \
-            --metadata "ApexClass" \
             --metadata "CustomObject" \
             --metadata "CustomField" \
             --metadata "LightningComponentBundle" \
@@ -104,10 +103,6 @@ jobs:
             --metadata "CustomLabel" \
             --metadata "StandardValueSet" \
             --metadata "GlobalValueSet" \
-            --metadata "ExternalClientApplication" \
-            --metadata "ExtlClntAppOauthConfigurablePolicies" \
-            --metadata "ExtlClntAppOauthSettings" \
-            --metadata "OauthCustomScope" \
             --output-dir "$TMP_DIR/org"
 
       - name: Filter Org-Owned Metadata from the Target Org Manifest
