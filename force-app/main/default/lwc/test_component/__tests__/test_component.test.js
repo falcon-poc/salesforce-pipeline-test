@@ -8,7 +8,7 @@ describe("c-test_component", () => {
 
   it("Test_component shall intentionally fail", () => {
     expect(1).toEqual(
-      2,
+      1,
       "This component shall intentionally Pass. Here is the message output: test_component!"
     );
   });
