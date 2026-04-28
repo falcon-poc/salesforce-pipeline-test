@@ -57,18 +57,56 @@ jobs:
       - name: Run LWC tests
         run: |
 
+          echo "INSTANCE URL: ${{ secrets.TARGET_ORG_INSTANCE_URL }}"
+
           set -o pipefail
-          npx lwc-jest -- --passWithNoTests 2>&1
-          LWC_EXIT_CODE=$?
 
-          echo "LWC_EXIT_CODE: $LWC_EXIT_CODE"
+          OUTPUT=$(FORCE_COLOR=0 npx jest --config=jest.config.js \
+          --reporters=jest-silent-reporter \
+          --json \
+          --passWithNoTests \
+          --runInBand 2>/dev/null || true)
 
-          if [ $LWC_EXIT_CODE -ne 0 ]; then
-              echo "❌ LWC tests failed"
-              exit $LWC_EXIT_CODE
-          fi
+          echo "OUTPUT: $OUTPUT"
+
+          LWC_EXIT_STATUS=$(echo "$OUTPUT" | node -pe "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              j.success;
+          ")
+
+          if [ $LWC_EXIT_STATUS = "false" ]; then
+          # echo "Output file: $OUTPUT_FILE"
+
+          echo "$DEPLOY_JSON" > lwc-test-result.json
+
+            echo "$OUTPUT" | node -pe "
+                    const j = JSON.parse(require('fs').readFileSync(0));
+                    const testResults = j.testResults ?? 'Unknown';
+                    testResults.forEach(result => {
+                    if(result.status === 'failed' && result.assertionResults.length > 0){
+                        console.log('--------------------------------');
+                            result.assertionResults.forEach(assertion => {
+                                console.log(' 🔹Test File: ' + assertion.ancestorTitles);
+                                console.log(' 🔹Test Name: ' + assertion.title);
+                            });
+                        }
+                    })
+                    console.log('------------------------------');
+                "
+
+                echo -e "❌ LWC tests failed"
+                exit $LWC_EXIT_CODE
+            fi
 
           echo "✅ LWC tests passed"
+
+      - name: Creating The Deploy Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lwc-test-debug
+          path: |
+            lwc-test-result.json
 
       - name: Validate formatting
         run: |
