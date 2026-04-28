@@ -49,42 +49,64 @@ jobs:
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
+      - name: Run npm Install
+        run: |
+          npm ci
+
       #4. Run LWC tests
       - name: Run LWC tests
         run: |
+
           echo "INSTANCE URL: ${{ secrets.TARGET_ORG_INSTANCE_URL }}"
-          npm ci
 
           set -o pipefail
-          npx lwc-jest -- --passWithNoTests 2>&1
-          LWC_EXIT_CODE=$?
 
-          echo "LWC_EXIT_CODE: $LWC_EXIT_CODE"
+          OUTPUT=$(FORCE_COLOR=0 npx jest --config=jest.config.js \
+          --reporters=jest-silent-reporter \
+          --json \
+          --passWithNoTests \
+          --runInBand 2>/dev/null || true)
 
-          if [ $LWC_EXIT_CODE -ne 0 ]; then
-              echo "❌ LWC tests failed"
-              exit $LWC_EXIT_CODE
-          fi
+          echo "OUTPUT: $OUTPUT"
+
+          LWC_EXIT_STATUS=$(echo "$OUTPUT" | node -pe "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              j.success;
+          ")
+
+          if [ $LWC_EXIT_STATUS = "false" ]; then
+          # echo "Output file: $OUTPUT_FILE"
+
+            echo "$OUTPUT" > lwc-test-result.json
+
+            echo "$OUTPUT" | node -pe "
+                    const j = JSON.parse(require('fs').readFileSync(0));
+                    const testResults = j.testResults ?? 'Unknown';
+                    testResults.forEach(result => {
+                    if(result.status === 'failed' && result.assertionResults.length > 0){
+                        console.log('--------------------------------');
+                            result.assertionResults.forEach(assertion => {
+                                console.log(' 🔹Test File: ' + assertion.ancestorTitles);
+                                console.log(' 🔹Test Name: ' + assertion.title);
+                            });
+                        }
+                    })
+                    console.log('------------------------------');
+                "
+
+                echo -e "❌ LWC tests failed"
+                exit 1
+            fi
 
           echo "✅ LWC tests passed"
 
-      # # 5. Authenticate to Target Org
-      # - name: Authenticate to Target Org
-      #   run: |
-      #     AUTH_FILE=$(mktemp)
-      #     echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-      #     sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-      #     rm "$AUTH_FILE"
-
-      #      ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-
-      #     echo "ACTUAL_ORG_ID: $ACTUAL_ORG_ID"
-      #     echo "TARGET_ORG_ID: $TARGET_ORG_ID"
-
-      #     if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-      #         echo "--- Authentication failed. Exiting script. ---"
-      #         exit 1
-      #     fi
+      - name: Creating The Deploy Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lwc-test-debug
+          path: |
+            lwc-test-result.json
 
       # 5. Authenticate to Target Org with JWT Flow
       - name: Authenticate to Target Org with JWT Flow
