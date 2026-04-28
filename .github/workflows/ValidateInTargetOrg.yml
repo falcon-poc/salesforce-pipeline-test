@@ -77,7 +77,7 @@ jobs:
           if [ $LWC_EXIT_STATUS = "false" ]; then
           # echo "Output file: $OUTPUT_FILE"
 
-            echo "$DEPLOY_JSON" > lwc-test-result.json
+            echo "$OUTPUT" > lwc-test-result.json
 
             echo "$OUTPUT" | node -pe "
                     const j = JSON.parse(require('fs').readFileSync(0));
