@@ -20,7 +20,6 @@ jobs:
     environment: ${{ matrix.environment }}
 
     env:
-      TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
       TARGET_ALIAS: ${{ matrix.environment }}-drift-pipeline
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +34,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: ${{ env.BASE_BRANCH }}
+          ref: ${{ matrix.environment }}
           fetch-depth: 0
 
       - name: Use Node.js
@@ -46,7 +45,7 @@ jobs:
       - name: Install Salesforce CLI
         run: sudo npm install @salesforce/cli@2.128.5 --global
 
-      - name: Install Prettier
+      - name: Run npm Install
         run: |
           npm ci
 
@@ -58,21 +57,15 @@ jobs:
       - name: Create Temp Directory
         run: mkdir -p "$TMP_DIR" "$TMP_DIR/repo" "$TMP_DIR/org"
 
-      - name: Verify Auth
-        run: |
-          AUTH_FILE=$(mktemp)
-          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-          echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
-
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-          rm "$AUTH_FILE"          
-
-           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
+      - name: Authenticate to Target Org with JWT Flow
+        uses: ./.github/actions/authorize-org-with-jwt
+        with:
+          consumer_key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
+          username: ${{ secrets.TARGET_ORG_USERNAME }}
+          target_alias: ${{ env.TARGET_ALIAS }}
+          expected_org_id: ${{ secrets.TARGET_ORG_ID }}
 
       - name: Generate Source Branch Manifest
         run: |
@@ -104,6 +97,10 @@ jobs:
             --metadata "CustomLabel" \
             --metadata "StandardValueSet" \
             --metadata "GlobalValueSet" \
+            --metadata "ContentAsset" \
+            --metadata "CustomApplication" \
+            --metadata "BrandingSet" \
+            --metadata "LightningExperienceTheme" \
             --output-dir "$TMP_DIR/org"
 
       - name: Filter Org-Owned Metadata from the Target Org Manifest
@@ -239,7 +236,7 @@ jobs:
 
       - name: Set Drift Branch name
         run: |
-          echo "DRIFT_BRANCH=drift/reconciliation-${{ matrix.environment }}-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+          echo "DRIFT_BRANCH=drift/reconciliation-$BASE_BRANCH-$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
 
       - name: Commit and Push Drift Branch if Drift Detected
         id: detect_drift_step
@@ -266,14 +263,13 @@ jobs:
 
           if ! gh auth status &>/dev/null; then
               echo "⚠️  gh CLI is not authenticated. Skipping PR creation."
-              echo "Run 'gh auth login' or set GH_TOKEN to enable automatic PR creation."
               exit 1
           fi          
 
           gh pr create \
               --base "$BASE_BRANCH" \
               --head "$DRIFT_BRANCH" \
-              --title "Drift Reconciliation $(date +%Y-%m-%d)" \
+              --title "Drift Reconciliation - $BASE_BRANCH - $(date +%Y-%m-%d)" \
               --fill
 
           echo "PR Created for branch $DRIFT_BRANCH to $BASE_BRANCH"
