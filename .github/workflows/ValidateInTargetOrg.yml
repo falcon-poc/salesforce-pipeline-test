@@ -4,12 +4,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     branches:
-      - qa
-      - staging
-      - prod
       - dev
-    paths:
-      - "force-app/**"
 
 run-name: Validate against target org - ${{ github.event.pull_request.base.ref }}
 
@@ -23,11 +18,9 @@ jobs:
     env:
       TARGET_ALIAS: ${{ github.event.pull_request.base.ref }}-validate-pipeline
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
-      TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 
       TEMP_MANIFEST: "tempDeployManifest.xml"
       DEPLOY_WAIT: 10
-      VALIDATED_JOB_ID: ""
       SOURCE_DIR: "force-app"
 
     steps:
@@ -49,16 +42,20 @@ jobs:
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
+      # 4. Installing dependencies
       - name: Run npm Install
         run: |
+
           npm ci
 
-      #4. Run LWC tests
+      # 5. Validate feature branch is formatted
+      - name: Validate formatting
+        run: |
+          npm run prettier:verify
+
+      # 6. Run LWC tests
       - name: Run LWC tests
         run: |
-
-          echo "INSTANCE URL: ${{ secrets.TARGET_ORG_INSTANCE_URL }}"
-
           set -o pipefail
 
           OUTPUT=$(FORCE_COLOR=0 npx jest --config=jest.config.js \
@@ -67,7 +64,10 @@ jobs:
           --passWithNoTests \
           --runInBand 2>/dev/null || true)
 
-          echo "OUTPUT: $OUTPUT"
+          if [ ${#OUTPUT} = 0 ]; then
+            echo "No output from LWC tests"
+            exit 1
+          fi
 
           LWC_EXIT_STATUS=$(echo "$OUTPUT" | node -pe "
               const j = JSON.parse(require('fs').readFileSync(0));
@@ -75,7 +75,6 @@ jobs:
           ")
 
           if [ $LWC_EXIT_STATUS = "false" ]; then
-          # echo "Output file: $OUTPUT_FILE"
 
             echo "$OUTPUT" > lwc-test-result.json
 
@@ -100,7 +99,7 @@ jobs:
 
           echo "✅ LWC tests passed"
 
-      - name: Creating The Deploy Failure Artifact
+      - name: Creating The Validate Failure Artifact
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -108,33 +107,23 @@ jobs:
           path: |
             lwc-test-result.json
 
-      - name: Validate formatting
-        run: |
-          npm run prettier:verify
+      # 7. Authenticate to Target Org with JWT Flow
+      - name: Authenticate to Target Org with JWT Flow
+        uses: ./.github/actions/authorize-org-with-jwt
+        with:
+          consumer_key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
+          username: ${{ secrets.TARGET_ORG_USERNAME }}
+          target_alias: ${{ env.TARGET_ALIAS }}
+          expected_org_id: ${{ secrets.TARGET_ORG_ID }}
 
-      # 5. Authenticate to Target Org
-      - name: Authenticate to Target Org
-        run: |
-          AUTH_FILE=$(mktemp)
-          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-          echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
-
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-          rm "$AUTH_FILE"          
-
-           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
-
-      # 6. Generate Manifest file
+      # 8. Generate Manifest file
       - name: Generate Manifest file
         run: |
           sf project generate manifest --source-dir "$SOURCE_DIR" --name "$TEMP_MANIFEST"
 
-      # 7. Authenticate and deploy metadata to Target org
+      # 9. Authenticate and deploy metadata to Target org
       - name: Validate Metadata against Target Org
         run: |
 
@@ -143,6 +132,7 @@ jobs:
             --target-org "$TARGET_ALIAS" \
             --test-level RunLocalTests \
             --wait "$DEPLOY_WAIT" \
+            --verbose \
             --json || true)
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
@@ -151,16 +141,29 @@ jobs:
           ")
 
           if [[ $STATUS != "Succeeded" ]]; then
-              echo "❌ Deployment failed! Status: $STATUS"
-              echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
-              exit $EXIT_CODE
+            echo "❌ Deployment failed! Status: $STATUS"
+            echo "Failed Tests:"
+            echo "--------------------------------"
+
+            echo "$DEPLOY_JSON" | node -e "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              const message = j.message || '';
+              const parsedMessage = message.split('\n')[1];
+              parsedMessage.split(',').forEach(test => {
+                if(test){
+                  console.log(' 🔹 ' + test.trim());
+                }
+              });
+            "
+            echo "--------------------------------"
+            exit 1
           fi
 
           echo "✅ Validation Status: $STATUS"
 
           echo "🎉 Validation pipeline completed successfully!"
 
-      # 8. Cleanup
+      # 10. Cleanup
       - name: Cleanup
         if: always()
         run: |
