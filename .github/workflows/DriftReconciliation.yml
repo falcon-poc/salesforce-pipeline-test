@@ -4,18 +4,44 @@ on:
   schedule:
     - cron: "0 7 * * *"
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run drift reconciliation for"
+        required: false
+        type: choice
+        options:
+          - dev
+          - qa
+          - main
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+
+    steps:
+      - name: Determine matrix
+        id: set
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.environment }}" ]; then
+            echo "matrix=[\"${{ inputs.environment }}\"]" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=[\"dev\",\"qa\",\"main\"]" >> $GITHUB_OUTPUT
+          fi
+
   detect-drift:
     name: Detect and Report State Drift
     runs-on: ubuntu-latest
+    needs: set-matrix
     strategy:
+      fail-fast: false
       matrix:
-        environment: [dev]
+        environment: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     environment: ${{ matrix.environment }}
 
@@ -31,6 +57,10 @@ jobs:
       TMP_DIR: "tmp-drift"
 
     steps:
+      - name: Log drift scope
+        run: |
+          echo "Running drift for: ${{ matrix.environment }}"
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
@@ -185,10 +215,14 @@ jobs:
 
                       #check if member matches any exclude pattern
                       if [[ $keep -eq 1 ]]; then
-                          #get exclude array for current type
                           ex_ref="_ex_${current_type}[@]"
-                          for pat in "${!ex_ref}"; do
-                              if [[ "$member" == $pat ]]; then keep=0; break; fi
+                          ex_arr=("${!ex_ref}")
+
+                          for pat in "${ex_arr[@]}"; do
+                              if [[ "$member" == $pat ]]; then
+                                  keep=0
+                                  break
+                              fi
                           done
                       fi
 
@@ -243,15 +277,18 @@ jobs:
         run: |
           git add -A "$REPO_DIR/"
 
-          echo "should_create_pr=true" >> $GITHUB_OUTPUT
-
           if git diff --cached --quiet; then
-              echo "No drift detected."
-              echo "should_create_pr=false" >> $GITHUB_OUTPUT
-              exit 0
+            echo "No drift detected."
+            echo "should_create_pr=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
-          git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"   
+          echo "Drift detected."
+          echo "should_create_pr=true" >> $GITHUB_OUTPUT
+
+          git checkout -B "$DRIFT_BRANCH" "$BASE_BRANCH"
+
+          git add -A "$REPO_DIR/"
 
           git commit -m "drift: reconciliation $(date +%Y-%m-%d)"
 
