@@ -51,7 +51,7 @@ jobs:
 
           npm ci
           set -o pipefail
-          npx lwc-jest 2>&1
+          npx lwc-jest -- --passWithNoTests 2>&1
           LWC_EXIT_CODE=$?
 
           if [ $LWC_EXIT_CODE -ne 0 ]; then
@@ -64,29 +64,32 @@ jobs:
 
       # 5. Authenticate to Dev Hub
       - name: Authenticate to Dev Hub
-        run: |
-          echo "--- Authenticating with Salesforce Org using sfdx Auth URL ---"
-
-          AUTH_FILE=$(mktemp)
-          echo "$DEV_HUB_AUTH_URL" > "$AUTH_FILE"
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$DEV_HUB_TARGET_ALIAS" --set-default-dev-hub
-          rm "$AUTH_FILE"          
-
-          ACTUAL_ORG_ID=$(sf org display --target-org "$DEV_HUB_TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")          
-                
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${DEV_HUB_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
+        uses: ./.github/actions/authorize-org-with-auth-url
+        with:
+          target-org-auth-url: ${{ secrets.DEV_HUB_AUTH_URL }}
+          target-org-alias: ${{ env.DEV_HUB_TARGET_ALIAS }}
+          expected-org-id: ${{ secrets.DEV_HUB_ORG_ID }}
 
       # 6. Create scratch org for validation/testing
       - name: Create Scratch Org
         run: |
-          echo "Creating Scratch Org..."
 
+          echo "Adding Dev Hub Org ID to Scratch Org Definition..."
+          TMP_SCRATCH_ORG_DEF=$(mktemp)        
+
+          node -e "
+            const fs = require('fs'); 
+            const srcPath = 'config/scratch-org-def.json'; 
+            const tmp = '$TMP_SCRATCH_ORG_DEF'; 
+            const j = JSON.parse(fs.readFileSync(srcPath,'utf8')); 
+            j.sourceOrg = process.env.DEV_HUB_ORG_ID; 
+            fs.writeFileSync(tmp, JSON.stringify(j,null,2));
+          " > "$TMP_SCRATCH_ORG_DEF"
+
+          echo "Creating Scratch Org..."          
           CREATE_SCRATCH_ORG_JSON=$(
               sf org create scratch \
-                  --definition-file "$SCRATCH_ORG_DEFINITION" \
+                  --definition-file "$TMP_SCRATCH_ORG_DEF" \
                   --target-dev-hub "$DEV_HUB_TARGET_ALIAS" \
                   --alias "$SCRATCH_ORG_ALIAS" \
                   --set-default \

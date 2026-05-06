@@ -1,6 +1,6 @@
 {
   "orgName": "Menlo Test Org",
-  "edition": "enterprise",
+  "sourceOrg": "",
   "features": ["Communities"],
   "settings": {
     "quoteSettings": {

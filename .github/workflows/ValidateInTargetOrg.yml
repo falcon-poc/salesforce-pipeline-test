@@ -4,11 +4,10 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     branches:
+      - dev
       - qa
       - staging
-      - prod
-    paths:
-      - "force-app/**"
+      - main
 
 run-name: Validate against target org - ${{ github.event.pull_request.base.ref }}
 
@@ -22,11 +21,9 @@ jobs:
     env:
       TARGET_ALIAS: ${{ github.event.pull_request.base.ref }}-validate-pipeline
       TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
-      TARGET_ORG_AUTH_URL: ${{ secrets.TARGET_ORG_AUTH_URL }}
 
       TEMP_MANIFEST: "tempDeployManifest.xml"
       DEPLOY_WAIT: 10
-      VALIDATED_JOB_ID: ""
       SOURCE_DIR: "force-app"
 
     steps:
@@ -48,47 +45,93 @@ jobs:
           sudo npm install @salesforce/cli@2.128.5 --global
           sf --version
 
-      #4. Run LWC tests
-      - name: Run LWC tests
+      # 4. Installing dependencies
+      - name: Run npm Install
         run: |
           npm ci
 
+      - name: Populate Artifact Filename
+        run: |
+          echo "LWC_TEST_RESULT_FILE=$(date +%Y-%m-%d)-${{ env.TARGET_ALIAS }}-lwc-test-result.json" >> $GITHUB_ENV
+          echo "APEX_TEST_RESULT_FILE=$(date +%Y-%m-%d)-${{ env.TARGET_ALIAS }}-apex-test-result.json" >> $GITHUB_ENV
+
+      # 5. Validate feature branch is formatted
+      - name: Validate formatting
+        run: |
+          npm run prettier:verify
+
+      # 6. Run LWC tests
+      - name: Run LWC tests
+        run: |
           set -o pipefail
-          npx lwc-jest 2>&1
-          LWC_EXIT_CODE=$?
 
-          echo "LWC_EXIT_CODE: $LWC_EXIT_CODE"
+          OUTPUT=$(FORCE_COLOR=0 npx jest --config=jest.config.js \
+          --reporters=jest-silent-reporter \
+          --json \
+          --passWithNoTests \
+          --runInBand 2>/dev/null || true)
 
-          if [ $LWC_EXIT_CODE -ne 0 ]; then
-              echo "❌ LWC tests failed"
-              exit $LWC_EXIT_CODE
+          if [ ${#OUTPUT} = 0 ]; then
+            echo "No output from LWC tests"
+            exit 1
           fi
+
+          LWC_EXIT_STATUS=$(echo "$OUTPUT" | node -pe "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              j.success;
+          ")
+
+          if [ $LWC_EXIT_STATUS = "false" ]; then
+
+            echo "$OUTPUT" > ${{ env.LWC_TEST_RESULT_FILE }}
+
+            echo "$OUTPUT" | node -pe "
+                    const j = JSON.parse(require('fs').readFileSync(0));
+                    const testResults = j.testResults ?? 'Unknown';
+                    testResults.forEach(result => {
+                    if(result.status === 'failed' && result.assertionResults.length > 0){
+                        console.log('--------------------------------');
+                            result.assertionResults.forEach(assertion => {
+                                console.log(' 🔹Test File: ' + assertion.ancestorTitles);
+                                console.log(' 🔹Test Name: ' + assertion.title);
+                            });
+                        }
+                    })
+                    console.log('------------------------------');
+                "
+
+                echo -e "❌ LWC tests failed"
+                echo -e "SEE ARTIFACT - ${{ env.LWC_TEST_RESULT_FILE }}"
+                exit 1
+            fi
 
           echo "✅ LWC tests passed"
 
-      # 5. Authenticate to Target Org
-      - name: Authenticate to Target Org
-        run: |
-          AUTH_FILE=$(mktemp)
-          echo "$TARGET_ORG_AUTH_URL" > "$AUTH_FILE"
-          echo "TARGET_ORG_AUTH_URL: $TARGET_ORG_AUTH_URL"
+      - name: Creating The Validate Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lwc-test-debug
+          path: |
+            ${{ env.LWC_TEST_RESULT_FILE }}
 
-          sf org login sfdx-url --sfdx-url-file "$AUTH_FILE" --alias "$TARGET_ALIAS"
-          rm "$AUTH_FILE"          
+      # 7. Authenticate to Target Org with JWT Flow
+      - name: Authenticate to Target Org with JWT Flow
+        uses: ./.github/actions/authorize-org-with-jwt
+        with:
+          consumer_key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
+          username: ${{ secrets.TARGET_ORG_USERNAME }}
+          target_alias: ${{ env.TARGET_ALIAS }}
+          expected_org_id: ${{ secrets.TARGET_ORG_ID }}
 
-           ACTUAL_ORG_ID=$(sf org display --target-org "$TARGET_ALIAS" --json | node -pe "JSON.parse(fs.readFileSync(0)).result.id")
-
-          if [ "${ACTUAL_ORG_ID:0:15}" != "${TARGET_ORG_ID:0:15}" ]; then
-              echo "--- Authentication failed. Exiting script. ---"
-              exit 1
-          fi
-
-      # 6. Generate Manifest file
+      # 8. Generate Manifest file
       - name: Generate Manifest file
         run: |
           sf project generate manifest --source-dir "$SOURCE_DIR" --name "$TEMP_MANIFEST"
 
-      # 7. Authenticate and deploy metadata to Target org
+      # 9. Authenticate and deploy metadata to Target org
       - name: Validate Metadata against Target Org
         run: |
 
@@ -97,6 +140,7 @@ jobs:
             --target-org "$TARGET_ALIAS" \
             --test-level RunLocalTests \
             --wait "$DEPLOY_WAIT" \
+            --verbose \
             --json || true)
 
           STATUS=$(echo "$DEPLOY_JSON" | node -pe "
@@ -105,16 +149,39 @@ jobs:
           ")
 
           if [[ $STATUS != "Succeeded" ]]; then
-              echo "❌ Deployment failed! Status: $STATUS"
-              echo "DEPLOY RESPONSE JSON: $DEPLOY_JSON"
-              exit $EXIT_CODE
+            echo "❌ Deployment failed! Status: $STATUS"
+            echo "$DEPLOY_JSON" > ${{ env.APEX_TEST_RESULT_FILE }}
+            echo -e "SEE ARTIFACT - ${{ env.APEX_TEST_RESULT_FILE }}"
+            echo "Error Messages:"
+            echo "--------------------------------"
+
+            echo "$DEPLOY_JSON" | node -e "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              const message = j.message || '';
+              const parsedMessage = message.split('\n')[1];
+              parsedMessage.split(',').forEach(test => {
+                if(test){
+                  console.log(' 🔹 ' + test.trim());
+                }
+              });
+            "
+            echo "--------------------------------"
+            exit 1
           fi
 
           echo "✅ Validation Status: $STATUS"
 
           echo "🎉 Validation pipeline completed successfully!"
 
-      # 8. Cleanup
+      - name: Creating The Validate Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apex-validation-error-messages
+          path: |
+            ${{ env.APEX_TEST_RESULT_FILE }}
+
+      # 10. Cleanup
       - name: Cleanup
         if: always()
         run: |

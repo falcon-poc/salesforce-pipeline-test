@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Dont_make_bad_accounts</fullName>
+    <active>true</active>
+    <description>Only make good accounts</description>
+    <errorConditionFormula
+  >Name = &quot;Andrew Muyanja&quot;</errorConditionFormula>
+    <errorMessage>He cannot be trusted...</errorMessage>
+</ValidationRule>
