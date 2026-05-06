@@ -31,6 +31,7 @@ CustomApplication/Sales_Leader
 CustomApplication/Sales_Operations
 CustomApplication/Menlo_Sales_Console
 CustomApplication/Harmony_System_Menlo
+CustomApplication/Harmony_System
 
 # System-generated Apex classes
 ApexClass/ChangePasswordController
