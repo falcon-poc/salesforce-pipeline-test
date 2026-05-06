@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<ExtlClntAppOauthSettings xmlns="http://soap.sforce.com/2006/04/metadata">
-    <commaSeparatedOauthScopes
-  >Api, Web, Full, RefreshToken</commaSeparatedOauthScopes>
-    <externalClientApplication>Falcon_Deploy_Test</externalClientApplication>
-    <isFirstPartyAppEnabled>false</isFirstPartyAppEnabled>
-    <label>Falcon_Deploy_Test_oauth</label>
-    <oauthLink>00DWr00000AYq01:888Wr0000005iTR</oauthLink>
-</ExtlClntAppOauthSettings>
