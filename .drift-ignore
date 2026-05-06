@@ -13,9 +13,25 @@ CustomField/*__dll.*
 CustomField/*__dlm.*
 CustomField/*__hd.*
 
+# Exclude StandardValueSets
+StandardValueSet/*
+
+# Exclude Workflows (partially deprecated)
+Workflow/*
+
 # Namespaced permission sets and groups
 PermissionSet/*__*
 PermissionSetGroup/force__*
+
+# Custom Applications
+CustomApplication/standard__*
+CustomApplication/Success_Manager
+CustomApplication/Inside_Sales
+CustomApplication/Sales_Leader
+CustomApplication/Sales_Operations
+CustomApplication/Menlo_Sales_Console
+CustomApplication/Harmony_System_Menlo
+CustomApplication/Harmony_System
 
 # System-generated Apex classes
 ApexClass/ChangePasswordController
