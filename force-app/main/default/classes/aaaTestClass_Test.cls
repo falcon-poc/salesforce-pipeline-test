@@ -6,4 +6,9 @@ private class aaaTestClass_Test {
     aaaTestClass testClass = new aaaTestClass();
     System.assertEquals('testValue', testClass.testProperty);
   }
+
+  // @isTest
+  // static void intentionalFailure(){
+  //   System.assert(false, 'This is an intentional failure: aaaTestClass');
+  // }
 }

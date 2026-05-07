@@ -1,0 +1,173 @@
+name: Salesforce CI/CD - Deploy to target org
+
+on:
+  push:
+    branches:
+      - qa
+      - staging
+      - dev
+      - main
+  workflow_dispatch:
+
+run-name: Deploy to target org - ${{ github.ref_name }}
+
+jobs:
+  deploy-to-target-org:
+    name: Deploy to target org - ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    environment: ${{ github.ref_name }}
+
+    env:
+      TARGET_ALIAS: ${{ github.ref_name }}-deploy-pipeline
+      TARGET_ORG_ID: ${{ secrets.TARGET_ORG_ID }}
+
+      TEMP_MANIFEST: "tempDeployManifest.xml"
+      DEPLOY_WAIT: 10
+      SOURCE_DIR: "force-app"
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Install Node.js
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.1"
+          cache: "npm"
+
+      # 3. Install Salesforce CLI
+      - name: Install Salesforce CLI
+        run: |
+          echo "Deploying to target branch: ${{ github.ref_name }}"
+          sudo npm install @salesforce/cli@2.128.5 --global
+          sf --version
+
+      - name: Run npm Install
+        run: |
+          npm ci
+
+      - name: Populate Artifact Filename
+        run: |
+          echo "LWC_TEST_RESULT_FILE=$(date +%Y-%m-%d)-${{ env.TARGET_ALIAS }}-lwc-test-result.json" >> $GITHUB_ENV
+          echo "APEX_TEST_RESULT_FILE=$(date +%Y-%m-%d)-${{ env.TARGET_ALIAS }}-apex-test-result.json" >> $GITHUB_ENV
+
+      #4. Run LWC tests
+      - name: Run LWC tests
+        run: |
+          set -o pipefail
+
+          OUTPUT=$(FORCE_COLOR=0 npx jest --config=jest.config.js \
+          --reporters=jest-silent-reporter \
+          --json \
+          --passWithNoTests \
+          --runInBand 2>/dev/null || true)
+
+          if [ ${#OUTPUT} = 0 ]; then
+            echo "No output from LWC tests"
+            exit 1
+          fi
+
+          LWC_EXIT_STATUS=$(echo "$OUTPUT" | node -pe "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              j.success;
+          ")
+
+          if [ $LWC_EXIT_STATUS = "false" ]; then
+
+            echo "$OUTPUT" > ${{ env.LWC_TEST_RESULT_FILE }}
+
+            echo "$OUTPUT" | node -pe "
+                    const j = JSON.parse(require('fs').readFileSync(0));
+                    const testResults = j.testResults ?? 'Unknown';
+                    testResults.forEach(result => {
+                    if(result.status === 'failed' && result.assertionResults.length > 0){
+                        console.log('--------------------------------');
+                            result.assertionResults.forEach(assertion => {
+                                console.log(' 🔹Test File: ' + assertion.ancestorTitles);
+                                console.log(' 🔹Test Name: ' + assertion.title);
+                            });
+                        }
+                    })
+                    console.log('------------------------------');
+                "
+
+                echo -e "❌ LWC tests failed"
+                echo -e "SEE ARTIFACT - ${{ env.LWC_TEST_RESULT_FILE }}"
+                exit 1
+            fi
+
+          echo "✅ LWC tests passed"
+
+      - name: Creating The LWC Test Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lwc-test-debug
+          path: |
+            ${{ env.LWC_TEST_RESULT_FILE }}
+
+      # 5. Authenticate to Target Org with JWT Flow
+      - name: Authenticate to Target Org with JWT Flow
+        uses: ./.github/actions/authorize-org-with-jwt
+        with:
+          consumer_key: ${{ secrets.TARGET_ORG_CONSUMER_KEY }}
+          jwt_key: ${{ secrets.TARGET_ORG_JWT_KEY }}
+          instance_url: ${{ secrets.TARGET_ORG_INSTANCE_URL }}
+          username: ${{ secrets.TARGET_ORG_USERNAME }}
+          target_alias: ${{ env.TARGET_ALIAS }}
+          expected_org_id: ${{ secrets.TARGET_ORG_ID }}
+
+      # 6. Generate Manifest file
+      - name: Generate Manifest file
+        run: |
+          sf project generate manifest --source-dir "$SOURCE_DIR" --name "$TEMP_MANIFEST"
+
+      # 7. Authenticate and deploy metadata to Target org
+      - name: Deploy Metadata to Target Org
+        run: |
+
+          DEPLOY_JSON=$(sf project deploy start \
+            --manifest "$TEMP_MANIFEST" \
+            --target-org "$TARGET_ALIAS" \
+            --test-level RunLocalTests \
+            --wait "$DEPLOY_WAIT" \
+            --json || true)
+
+          STATUS=$(echo "$DEPLOY_JSON" | node -pe "
+              const j = JSON.parse(require('fs').readFileSync(0));
+              j.result?.status || 'Unknown';
+          ")
+
+          if [[ $STATUS != "Succeeded" ]]; then
+              echo "❌ Deployment failed! Status: $STATUS"
+              echo -e "SEE ARTIFACT - ${{ env.APEX_TEST_RESULT_FILE }}"
+              echo "$DEPLOY_JSON" > ${{ env.APEX_TEST_RESULT_FILE }}
+              exit 1
+          fi
+
+          echo "✅ Deployment Status: $STATUS"
+
+          echo "🎉 Deployment pipeline completed successfully!"
+
+      - name: Creating The Deploy Failure Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-error-messages
+          path: |
+            ${{ env.APEX_TEST_RESULT_FILE }}
+
+      # 8. Cleanup
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "🔹 Cleaning up: Logging out from $TARGET_ALIAS..."
+          sf org logout --target-org "$TARGET_ALIAS" --no-prompt || true
+
+          echo "🔹 Cleaning up: Deleting temporary manifest file..."
+          [[ -f "$TEMP_MANIFEST" ]] && rm -f "$TEMP_MANIFEST"
+
+          echo "✅ Cleanup complete"
