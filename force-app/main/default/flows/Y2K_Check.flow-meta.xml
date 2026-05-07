@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <areMetricsLoggedToDataCloud>true</areMetricsLoggedToDataCloud>
+    <dataSpace>default</dataSpace>
+    <decisions>
+        <name>Check_Something</name>
+        <label>Check Something</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>X2000s</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Flow.CurrentDate</leftValueReference>
+                <operator>GreaterThan</operator>
+                <rightValue>
+                    <dateValue>1999-12-31</dateValue>
+                </rightValue>
+            </conditions>
+            <label>2000s Baby</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <exitRules>
+        <name>Exit_Rule</name>
+        <conditions>
+            <leftValueReference>$Flow.CurrentDate</leftValueReference>
+            <operator>GreaterThan</operator>
+            <rightValue>
+                <dateValue>3000-01-01</dateValue>
+            </rightValue>
+        </conditions>
+        <label>Exit Rule</label>
+        <logicalOperator>and</logicalOperator>
+        <ruleOrder>1</ruleOrder>
+    </exitRules>
+    <interviewLabel>Y2K Check {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Y2K Check</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Something</targetReference>
+        </connector>
+        <triggerType>Activation</triggerType>
+    </start>
+    <status>InvalidDraft</status>
+</Flow>
