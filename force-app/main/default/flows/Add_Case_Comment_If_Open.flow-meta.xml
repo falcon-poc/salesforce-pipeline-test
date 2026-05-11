@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <description
+    >Assigns a case comment success message to the outcomeMessage variable. Note: This Assignment is a placeholder for enablement purposes and must be reconfigured in order to define the outcomeMessage variable meaningfully.</description>
+        <name>AssignSuccessMessageToVariable</name>
+        <label>Assign Success Message to Variable</label>
+        <locationX>50</locationX>
+        <locationY>350</locationY>
+        <assignmentItems>
+            <assignToReference>outcomeMessage</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Comment was added to the case</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <description
+    >Determines whether a case for a given customer exists before adding a case comment.</description>
+        <name>DoesCaseExist</name>
+        <label>Case Exists?</label>
+        <locationX>182</locationX>
+        <locationY>134</locationY>
+        <defaultConnectorLabel>No (Default)</defaultConnectorLabel>
+        <rules>
+            <name>CaseExists</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>caseRecord</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>caseRecord.IsClosed</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>CreateCaseCommentRecord</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <interviewLabel
+  >Add Case Comment If Open {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Add Case Comment If Open</label>
+    <overriddenFlow>SvcCopilotTmpl__AddCaseComment</overriddenFlow>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <description
+    >Creates a case comment record with the user-specified comment and publishes the comment. Sets the new record’s Parent ID to the Case ID passed into the flow.</description>
+        <name>CreateCaseCommentRecord</name>
+        <label>Create Case Comment Record</label>
+        <locationX>50</locationX>
+        <locationY>242</locationY>
+        <connector>
+            <targetReference>AssignSuccessMessageToVariable</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>CommentBody</field>
+            <value>
+                <elementReference>caseComment</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>IsPublished</field>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>ParentId</field>
+            <value>
+                <elementReference>caseRecord.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <object>CaseComment</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <start>
+        <locationX>56</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>DoesCaseExist</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <description
+    >Stores the text of the comment to add to the case.</description>
+        <name>caseComment</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description
+    >Stores the case record to be updated with a comment.</description>
+        <name>caseRecord</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <description
+    >Stores the message that lets the customer know whether the comment was successfully added to the case.</description>
+        <name>outcomeMessage</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <value>
+            <stringValue>Comment was not added to the case.</stringValue>
+        </value>
+    </variables>
+</Flow>
