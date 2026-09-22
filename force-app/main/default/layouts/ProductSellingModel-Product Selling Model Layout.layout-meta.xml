@@ -28,10 +28,6 @@
                 <behavior>Edit</behavior>
                 <field>PricingTermUnit</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>DoesAutoRenewAssetByDefault</field>
-            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
     </layoutSections>
@@ -66,6 +62,8 @@
         <customLabel>false</customLabel>
         <detailHeading>false</detailHeading>
         <editHeading>false</editHeading>
+        <layoutColumns />
+        <layoutColumns />
         <layoutColumns />
         <style>CustomLinks</style>
     </layoutSections>
