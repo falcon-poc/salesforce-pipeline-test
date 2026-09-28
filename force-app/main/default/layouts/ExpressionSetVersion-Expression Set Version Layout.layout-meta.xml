@@ -44,10 +44,6 @@
                 <behavior>Required</behavior>
                 <field>ApiName</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>ShouldShowExplExternally</field>
-            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
     </layoutSections>
